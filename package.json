@@ -1,14 +1,14 @@
 {
-  "name": "graphql",
+  "name": "atlargeapi",
   "version": "1.0.0",
-  "description": "example of using graphql",
+  "description": "Backend of 316 At Large project",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js --exec babel-node --presets  es2015,stage-2",
     "seed": "babel-node schema.js --presets es2015,stage-2"
   },
   "repository": {},
-  "author": "Madhav Poudel",
+  "author": "316 Power Squad",
   "license": "''''''''''''''''''''''''''''''''",
   "dependencies": {
     "async": "^2.5.0",
