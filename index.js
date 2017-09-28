@@ -1,7 +1,11 @@
 import express from 'express';
+import bodyParser from 'body-parser';
 import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
 import teamRouter from './routers/Team';
+
 const app = express();
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 // Connect to MySQL on start
 db.connect(MODE_TEST, function(err) {

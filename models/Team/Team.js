@@ -2,12 +2,14 @@
  * Example model for querying the teams
  */
 import db from '../../helpers/db';
+import { sqlError } from '../../helpers/db';
+import { noTeamError, nameError } from './errors';
 
 export const getTeam = (id, done) => {
-  db.get().query(`SELECT * FROM Team WHERE id=${id}`, (err, rows) => {
-    if (err) return done(null, err);
+  db.get().query(`SELECT * FROM Team WHERE id=?`, [id], (err, rows) => {
+    if (err) return done({}, sqlError);
     else if (rows.length === 0) {
-      return done(null, 'No team was found');
+      return done({}, noTeamError);
     }
     done(rows[0]);
   });
@@ -15,20 +17,28 @@ export const getTeam = (id, done) => {
 
 export const allTeams = done => {
   db.get().query(`SELECT * FROM Team`, (err, rows) => {
-    if (err) return done(null, err);
+    if (err) return done([], sqlError);
     done(rows);
   });
 };
 
-export const addTeam = (name, done) => {
-  db.get().query(`INSERT INTO Team (name) VALUES ('${name}')`, (err, rows) => {
-    if (err) return done(null, err);
-    // TODO: standardize API results with success / failure, etc
-    done(rows[0]);
-  });
+export const newTeam = (name, done) => {
+  if (name.length < 2) {
+    done([], nameError);
+  } else {
+    db
+      .get()
+      .query(`INSERT INTO Team (name) VALUES (?)`, [name], (err, result) => {
+        if (err) return done([], sqlError);
+        done({
+          id: result.insertId,
+        });
+      });
+  }
 };
 
 export default {
   getTeam,
   allTeams,
+  newTeam,
 };
