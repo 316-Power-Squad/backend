@@ -4,23 +4,25 @@
 import express from 'express';
 const router = express.Router();
 import Team from '../models/Team';
+import { formatResponse } from '../helpers/api';
 
 router.get('/', (req, res) => {
   Team.allTeams((result, err) => {
-    if (err) res.send(err);
-    else res.send(result);
+    res.send(formatResponse(result, err));
   });
 });
 
 router.post('/new', (req, res) => {
   // create a new team
-  res.send('NOT IMPLEMENTED');
+  const name = req.body.name;
+  Team.newTeam(name, (result, err) => {
+    res.send(formatResponse(result, err));
+  });
 });
 
 router.get('/:id', (req, res) => {
   Team.getTeam(req.params.id, (result, err) => {
-    if (err) res.send(err);
-    else res.send(result);
+    res.send(formatResponse(result, err));
   });
 });
 
