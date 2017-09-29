@@ -1,5 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import morgan from 'morgan';
 import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
 import apiRouter from './routers/api';
 import userRouter from './routers/User';
@@ -7,6 +8,9 @@ import userRouter from './routers/User';
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Request logging
+app.use(morgan('dev'));
 
 // Connect to MySQL on start
 db.connect(MODE_TEST, function(err) {
