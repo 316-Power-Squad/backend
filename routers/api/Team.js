@@ -3,8 +3,8 @@
  */
 import express from 'express';
 const router = express.Router();
-import Team from '../models/Team';
-import { formatResponse } from '../helpers/api';
+import Team from '../../models/Team';
+import { formatResponse } from '../../helpers/api';
 
 router.get('/', (req, res) => {
   Team.allTeams((result, err) => {

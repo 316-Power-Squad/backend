@@ -1,11 +1,16 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import morgan from 'morgan';
 import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
-import teamRouter from './routers/Team';
+import apiRouter from './routers/api';
+import userRouter from './routers/User';
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Request logging
+app.use(morgan('dev'));
 
 // Connect to MySQL on start
 db.connect(MODE_TEST, function(err) {
@@ -13,13 +18,9 @@ db.connect(MODE_TEST, function(err) {
     console.log('Unable to connect to MySQL.');
     process.exit(1);
   } else {
-    // Define the API endpoints
-    app.get('/api', (req, res) => {
-      res.send('Hello world');
-    });
-
     // namespaced routes
-    app.use('/api/teams', teamRouter);
+    app.use('/api', apiRouter);
+    app.use('/auth', userRouter);
 
     // Define the port we are listening on
     app.listen(3001, () => {
