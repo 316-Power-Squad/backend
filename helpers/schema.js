@@ -26,10 +26,10 @@ export const Schemas = [
 `,
   `
   CREATE TABLE Users (
-    username varchar(255),
+    email varchar(255),
     name varchar(255),
     hash varchar(255),
-    PRIMARY KEY (username)
+    PRIMARY KEY (email)
   )
 `,
 ];
