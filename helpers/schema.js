@@ -14,7 +14,7 @@ export const createDatabaseQueries = [
   `CREATE DATABASE IF NOT EXISTS atlargeprod`,
 ];
 
-export const dropQuery = `DROP TABLE IF EXISTS Team, User`;
+export const dropQuery = `DROP TABLE IF EXISTS Team, User, Admin, Meet, Participates, RegionalRank`;
 
 export const Schemas = [
   `
@@ -22,6 +22,12 @@ export const Schemas = [
     email varchar(255) NOT NULL,
     name varchar(255) NOT NULL,
     hash varchar(255) NOT NULL,
+    PRIMARY KEY (email)
+  )
+`,
+  `
+  CREATE TABLE Admin (
+    email varchar(255) NOT NULL REFERENCES User(email),
     PRIMARY KEY (email)
   )
 `,

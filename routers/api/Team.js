@@ -14,8 +14,8 @@ router.get('/', (req, res) => {
 
 router.post('/new', (req, res) => {
   // create a new team
-  const name = req.body.name;
-  Team.newTeam(name, (result, err) => {
+  const { name, gender, region } = req.body;
+  Team.newTeam(name, gender, region, (result, err) => {
     res.send(formatResponse(result, err));
   });
 });

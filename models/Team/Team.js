@@ -22,18 +22,22 @@ export const allTeams = done => {
   });
 };
 
-export const newTeam = (name, done) => {
-  if (name.length < 2) {
+export const newTeam = (name, gender, region, done) => {
+  if (name.length < 2 || !['mens', 'womens'].includes(gender)) {
     done([], nameError);
   } else {
     db
       .get()
-      .query(`INSERT INTO Team (name) VALUES (?)`, [name], (err, result) => {
-        if (err) return done([], sqlError);
-        done({
-          id: result.insertId,
-        });
-      });
+      .query(
+        `INSERT INTO Team (name, gender, region) VALUES (?, ?, ?)`,
+        [name, gender, region],
+        (err, result) => {
+          if (err) return done([], sqlError);
+          done({
+            id: result.insertId,
+          });
+        }
+      );
   }
 };
 
