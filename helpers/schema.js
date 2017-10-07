@@ -14,22 +14,47 @@ export const createDatabaseQueries = [
   `CREATE DATABASE IF NOT EXISTS atlargeprod`,
 ];
 
-export const dropQuery = `DROP TABLE IF EXISTS Teams, Users`;
+export const dropQuery = `DROP TABLE IF EXISTS Team, User`;
 
 export const Schemas = [
   `
-  CREATE TABLE Teams (
+  CREATE TABLE User (
+    email varchar(255) NOT NULL,
+    name varchar(255) NOT NULL,
+    hash varchar(255) NOT NULL,
+    PRIMARY KEY (email)
+  )
+`,
+  `
+  CREATE TABLE Team (
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255),
+    gender ENUM('mens', 'womens'),
+    region varchar(255),
     PRIMARY KEY (ID)
   )
 `,
   `
-  CREATE TABLE Users (
-    email varchar(255),
+  CREATE TABLE Meet (
+    ID int NOT NULL AUTO_INCREMENT,
     name varchar(255),
-    hash varchar(255),
-    PRIMARY KEY (email)
+    date datetime,
+    PRIMARY KEY (ID)
+  )
+`,
+  `
+  CREATE TABLE Participates (
+    team_id int NOT NULL REFERENCES Team(id),
+    meet_id int NOT NULL REFERENCES Meet(id),
+    placement int,
+    PRIMARY KEY (team_id, meet_id)
+  )
+`,
+  `
+  CREATE TABLE RegionalRank (
+    team_id int NOT NULL REFERENCES Team(id),
+    rank int,
+    PRIMARY KEY (team_id)
   )
 `,
 ];

@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
@@ -8,6 +9,7 @@ import userRouter from './routers/User';
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors());
 
 // Request logging
 app.use(morgan('dev'));

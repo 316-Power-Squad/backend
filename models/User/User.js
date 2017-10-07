@@ -31,7 +31,7 @@ export const newUser = (name, email, password, done) => {
         db
           .get()
           .query(
-            `INSERT INTO Users (name, email, hash) values (?, ?, ?)`,
+            `INSERT INTO User (name, email, hash) values (?, ?, ?)`,
             [name, email, hash],
             (err, result) => {
               done({}, err);
@@ -45,7 +45,7 @@ export const newUser = (name, email, password, done) => {
 export const validateUser = (email, password, done) => {
   db
     .get()
-    .query(`SELECT hash FROM Users WHERE email=?`, [email], (err, rows) => {
+    .query(`SELECT hash FROM User WHERE email=?`, [email], (err, rows) => {
       if (err) done(false, sqlError);
       else {
         bcrypt.compare(password, rows[0].hash, (err, res) => {

@@ -6,7 +6,7 @@ import { sqlError } from '../../helpers/db';
 import { noTeamError, nameError } from './errors';
 
 export const getTeam = (id, done) => {
-  db.get().query(`SELECT * FROM Teams WHERE id=?`, [id], (err, rows) => {
+  db.get().query(`SELECT * FROM Team WHERE id=?`, [id], (err, rows) => {
     if (err) return done({}, sqlError);
     else if (rows.length === 0) {
       return done({}, noTeamError);
@@ -16,7 +16,7 @@ export const getTeam = (id, done) => {
 };
 
 export const allTeams = done => {
-  db.get().query(`SELECT * FROM Teams`, (err, rows) => {
+  db.get().query(`SELECT * FROM Team`, (err, rows) => {
     if (err) return done([], sqlError);
     done(rows);
   });
@@ -28,7 +28,7 @@ export const newTeam = (name, done) => {
   } else {
     db
       .get()
-      .query(`INSERT INTO Teams (name) VALUES (?)`, [name], (err, result) => {
+      .query(`INSERT INTO Team (name) VALUES (?)`, [name], (err, result) => {
         if (err) return done([], sqlError);
         done({
           id: result.insertId,
