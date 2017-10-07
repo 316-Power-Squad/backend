@@ -43,22 +43,26 @@ export const newUser = (name, email, password, done) => {
 };
 
 export const validateUser = (email, password, done) => {
-  db
-    .get()
-    .query(`SELECT hash FROM User WHERE email=?`, [email], (err, rows) => {
-      if (err) done(false, sqlError);
-      else {
-        bcrypt.compare(password, rows[0].hash, (err, res) => {
-          if (res) {
-            // We have a valid user...pass them a signed JWT token
-            const token = jwt.sign(rows[0].hash, process.env.JWT_SECRET);
-            done({ valid: true, token });
-          } else {
-            done({ valid: false }, invalidPasswordError);
-          }
-        });
-      }
-    });
+  db.get().query(`SELECT * FROM User WHERE email=?`, [email], (err, rows) => {
+    if (err) done(false, sqlError);
+    else {
+      bcrypt.compare(password, rows[0].hash, (err, res) => {
+        if (res) {
+          // We have a valid user...pass them a signed JWT token
+          const token = jwt.sign(rows[0].hash, process.env.JWT_SECRET);
+          done({
+            user: {
+              email: rows[0].email,
+              name: rows[0].name,
+            },
+            token,
+          });
+        } else {
+          done({ valid: false }, invalidPasswordError);
+        }
+      });
+    }
+  });
 };
 
 export default {
