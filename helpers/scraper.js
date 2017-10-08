@@ -87,18 +87,26 @@ var getAbbrev = function(state) {
 
 var getTeamName = function(school) {
   let usableWords = [];
+  var splitSchool = school.split(" ");
   if (school == "Boston Universty") {
     return "Boston_U"
-  } else if (school.includes("!")) {
-    var s = "";
-    var splitSchool = school.split(" ");
-    for (var i = 0; i < splitSchool.length; i++) {
+  }
+  for (var i = 0; i < splitSchool.length; i++) {
       if (splitSchool[i].includes("!")) {
         return usableWords.join("_");
       } else {
         usableWords.push(splitSchool[i]);
       }
+    } 
+  if (splitSchool[splitSchool.length - 1] == "University") {
+    if (splitSchool.length > 2) {
+      if (splitSchool[splitSchool.length - 2] == "State") {
+        splitSchool[splitSchool.length - 2] = "St"
+      }
     }
+    splitSchool[splitSchool.length - 1] = "";
+    splitSchool = splitSchool.splice(0, splitSchool.length - 1);
+    return splitSchool.join("_")
   }
   return school;
 }
