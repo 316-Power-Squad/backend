@@ -21,6 +21,88 @@ var notTitle = function(s) {
   return true;
 };
 
+var getAbbrev = function(state) {
+  let states = [
+        ['Arizona', 'AZ'],
+        ['Alabama', 'AL'],
+        ['Alaska', 'AK'],
+        ['Arizona', 'AZ'],
+        ['Arkansas', 'AR'],
+        ['California', 'CA'],
+        ['Colorado', 'CO'],
+        ['Connecticut', 'CT'],
+        ['Delaware', 'DE'],
+        ['Florida', 'FL'],
+        ['Georgia', 'GA'],
+        ['Hawaii', 'HI'],
+        ['Idaho', 'ID'],
+        ['Illinois', 'IL'],
+        ['Indiana', 'IN'],
+        ['Iowa', 'IA'],
+        ['Kansas', 'KS'],
+        ['Kentucky', 'KY'],
+        ['Kentucky', 'KY'],
+        ['Louisiana', 'LA'],
+        ['Maine', 'ME'],
+        ['Maryland', 'MD'],
+        ['Massachusetts', 'MA'],
+        ['Michigan', 'MI'],
+        ['Minnesota', 'MN'],
+        ['Mississippi', 'MS'],
+        ['Missouri', 'MO'],
+        ['Montana', 'MT'],
+        ['Nebraska', 'NE'],
+        ['Nevada', 'NV'],
+        ['New Hampshire', 'NH'],
+        ['New Jersey', 'NJ'],
+        ['New Mexico', 'NM'],
+        ['New York', 'NY'],
+        ['North Carolina', 'NC'],
+        ['North Dakota', 'ND'],
+        ['Ohio', 'OH'],
+        ['Oklahoma', 'OK'],
+        ['Oregon', 'OR'],
+        ['Pennsylvania', 'PA'],
+        ['Rhode Island', 'RI'],
+        ['South Carolina', 'SC'],
+        ['South Dakota', 'SD'],
+        ['Tennessee', 'TN'],
+        ['Texas', 'TX'],
+        ['Utah', 'UT'],
+        ['Vermont', 'VT'],
+        ['Virginia', 'VA'],
+        ['Washington', 'WA'],
+        ['West Virginia', 'WV'],
+        ['Wisconsin', 'WI'],
+        ['Wyoming', 'WY'],
+    ];
+
+    for (var i = 0; i < states.length; i++) {
+      if (state == states[i][0]) {
+        return states[i][1];
+      }
+    }
+    return "";
+}
+
+var getTeamName = function(school) {
+  let usableWords = [];
+  if (school == "Boston Universty") {
+    return "Boston_U"
+  } else if (school.includes("!")) {
+    var s = "";
+    var splitSchool = school.split(" ");
+    for (var i = 0; i < splitSchool.length; i++) {
+      if (splitSchool[i].includes("!")) {
+        return usableWords.join("_");
+      } else {
+        usableWords.push(splitSchool[i]);
+      }
+    }
+  }
+  return school;
+}
+
 request(
   'https://en.wikipedia.org/wiki/List_of_NCAA_Division_I_institutions',
   function(err, resp, body) {
@@ -32,7 +114,7 @@ request(
         const row = $(this)
           .text()
           .split('\n');
-        const data = [row[1], row[4]];
+        const data = [getTeamName(row[1]), getAbbrev(row[4])];
         console.log(data);
         if (data[0].split(' ').length > 1 && notTitle(data[0])) {
           count++;
