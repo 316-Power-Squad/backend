@@ -1,13 +1,14 @@
-var request = require('request'),
-  cheerio = require('cheerio'),
-  urls = [];
+import request from 'request';
+import cheerio from 'cheerio';
+
+let urls = [];
 // ex. https://www.tfrrs.org/teams/xc/NC_college_m_Duke.html
 let teamBaseUrl = "https://www.tfrrs.org/teams/xc/";
 
 //ex. https://www.tfrrs.org/results/xc/11563.html
 let resultBaseUrl = "https://www.tfrrs.org/results/xc/";
 
-let notTitle = function(s) {
+const notTitle = function(s) {
   if (
     s == 'Primary Conference' ||
     s == 'Making Transition' ||
@@ -26,7 +27,7 @@ let notTitle = function(s) {
   return true;
 };
 
-let getAbbrev = function(state) {
+const getAbbrev = function(state) {
   let states = [
         ['Arizona', 'AZ'],
         ['Alabama', 'AL'],
@@ -91,7 +92,7 @@ let getAbbrev = function(state) {
     return "";
 }
 
-let getCalifornia = function(school) {
+const getCalifornia = function(school) {
   let splitSchool = school.split(" ");
   let usableWords = [];
   for (var i = 0; i < splitSchool.length; i++) {
@@ -123,7 +124,7 @@ let getCalifornia = function(school) {
   }
 }
 
-let getNC = function (school) {
+const getNC = function (school) {
     let splitSchool = school.split(" ");
     if (school.includes("Chapel Hill")) {
       return "North Carolina";
@@ -131,7 +132,8 @@ let getNC = function (school) {
         return "UNC_".concat(splitSchool[2]);
     }
 }
-let getWisco = function(school) {
+
+const getWisco = function(school) {
   let splitSchool = school.split(" ");
   if (school.includes("Madison")) {
     return "Wisconsin";
@@ -140,7 +142,7 @@ let getWisco = function(school) {
   }
 }
 
-let getTexas = function(school) {
+const getTexas = function(school) {
   let splitSchool = school.split(" ");
   let usableWords = [];
   for (var i = 0; i < splitSchool.length; i++) {
@@ -159,7 +161,7 @@ let getTexas = function(school) {
   }
 }
 
-let getTeamName = function(school) {
+const getTeamName = function(school) {
   let usableWords = [];
   let splitSchool = school.split(" ");
   if (school == "Boston University") {
@@ -193,14 +195,16 @@ let getTeamName = function(school) {
   }
   return school;
 }
-let getSchoolNames = function() {
+
+const getSchoolNames = async () => {
+    return new Promise((resolve, reject) => {
     let names = [];
-    var done = false;
+    let count = 0;
     request(
       'https://en.wikipedia.org/wiki/List_of_NCAA_Division_I_institutions',
       function(err, resp, body) {
         if (!err && resp.statusCode == 200) {
-          console.log('cake');
+          //console.log('cake');
           var $ = cheerio.load(body);
           var count = 0;
           $('tr', '.sortable').each(function() {
@@ -208,32 +212,49 @@ let getSchoolNames = function() {
               .text()
               .split('\n');
             const data = [getTeamName(row[1]), getAbbrev(row[4])];
-            console.log(data);
+            //console.log(data);
             names.push(data);
             if (data[0].split(' ').length > 1 && notTitle(data[0])) {
               count++;
             }
           });
+          resolve(names);
         } else {
           console.log(resp.statusCode);
+          reject(err);
         }
       }
-    );
-    return names;
+    )});
 }
 
-let getResults = function() {
-  teams = getSchoolNames();
-  // if you print teams, you'll see that it's empty.
-  for (var i = 0; i < teams.length; i++) {
-    var url = teamBaseUrl.concat(teams[i][1]).concat("_college_m_").concat(teams[i][0]);
-    console.log(url);
-    request(url , function(err, resp, body) {
+const getResults = async () => {
+  const teams = await getSchoolNames();
+    for (var i = 0; i < teams.length; i++) {
+      var url = teamBaseUrl.concat(teams[i][1]).concat("_college_m_").concat(teams[i][0]);
+      //console.log(url);
+      request(url , function(err, resp, body) {
       if (!err && resp.statusCode == 200) {
-          console.log(body);
+          var $ = cheerio.load(body);
+          $('tr', '.data, .scroll').each(function() {
+            sleep();
+            console.log($(this).find('.date').text());
+            console.log($(this).find('a').attr('href'));
+          });
       }
     })
+    }
   }
+  //console.log(teams);
+  // if you print teams, you'll see that it's empty.
+
+const delay = function(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const sleep = async () => {
+  console.log('Taking a break...');
+  await delay(((Math.random() * 5) + 1) * 1000)
+  console.log('Two second later');
 }
 
 getResults();
