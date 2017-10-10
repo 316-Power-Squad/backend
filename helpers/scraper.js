@@ -1,8 +1,13 @@
 var request = require('request'),
   cheerio = require('cheerio'),
   urls = [];
+// ex. https://www.tfrrs.org/teams/xc/NC_college_m_Duke.html
+let teamBaseUrl = "https://www.tfrrs.org/teams/xc/";
 
-var notTitle = function(s) {
+//ex. https://www.tfrrs.org/results/xc/11563.html
+let resultBaseUrl = "https://www.tfrrs.org/results/xc/";
+
+let notTitle = function(s) {
   if (
     s == 'Primary Conference' ||
     s == 'Making Transition' ||
@@ -21,7 +26,7 @@ var notTitle = function(s) {
   return true;
 };
 
-var getAbbrev = function(state) {
+let getAbbrev = function(state) {
   let states = [
         ['Arizona', 'AZ'],
         ['Alabama', 'AL'],
@@ -71,7 +76,8 @@ var getAbbrev = function(state) {
         ['Utah', 'UT'],
         ['Vermont', 'VT'],
         ['Virginia', 'VA'],
-        ['Washington', 'WA'],
+        ['Washington', 'WA'], 
+        ['District of Columbia', 'DC'],
         ['West Virginia', 'WV'],
         ['Wisconsin', 'WI'],
         ['Wyoming', 'WY'],
@@ -85,7 +91,7 @@ var getAbbrev = function(state) {
     return "";
 }
 
-var getCalifornia = function(school) {
+let getCalifornia = function(school) {
   let splitSchool = school.split(" ");
   let usableWords = [];
   for (var i = 0; i < splitSchool.length; i++) {
@@ -117,7 +123,7 @@ var getCalifornia = function(school) {
   }
 }
 
-var getNC = function (school) {
+let getNC = function (school) {
     let splitSchool = school.split(" ");
     if (school.includes("Chapel Hill")) {
       return "North Carolina";
@@ -125,8 +131,35 @@ var getNC = function (school) {
         return "UNC_".concat(splitSchool[2]);
     }
 }
+let getWisco = function(school) {
+  let splitSchool = school.split(" ");
+  if (school.includes("Madison")) {
+    return "Wisconsin";
+  } else {
+    return "Wis_".concat(splitSchool[1]);
+  }
+}
 
-var getTeamName = function(school) {
+let getTexas = function(school) {
+  let splitSchool = school.split(" ");
+  let usableWords = [];
+  for (var i = 0; i < splitSchool.length; i++) {
+      if (splitSchool[i].includes("!")) {
+        break;
+      } else {
+        usableWords.push(splitSchool[i]);
+      }
+    } 
+  if (school.includes("Austin")) {
+    return "Texas";
+  } else if (school.includes("El Paso")) {
+    return "UTEP";
+  } else {
+      return "UT_".concat(usableWords.splice(1, usableWords.length - 1).join("_"));
+  }
+}
+
+let getTeamName = function(school) {
   let usableWords = [];
   let splitSchool = school.split(" ");
   if (school == "Boston University") {
@@ -139,7 +172,13 @@ var getTeamName = function(school) {
       return "Cal_Poly";
   } if (school.includes("University of North Carolina")) {
       return getNC(school);
-  }
+  } if (school.includes("University of Wisconsin")) {
+    return getWisco(school);
+  } if (school.includes("University of Texas")) {
+    return getTexas(school);
+  } if (splitSchool[0] == "Pennsylvania") {
+    splitSchool[0] = "Penn";
+  } 
   for (var i = 0; i < splitSchool.length; i++) {
       if (splitSchool[i].includes("!")) {
         return usableWords.join("_");
@@ -154,7 +193,9 @@ var getTeamName = function(school) {
   }
   return school;
 }
-var getSchoolNames = function() {
+let getSchoolNames = function() {
+    let names = [];
+    var done = false;
     request(
       'https://en.wikipedia.org/wiki/List_of_NCAA_Division_I_institutions',
       function(err, resp, body) {
@@ -168,6 +209,7 @@ var getSchoolNames = function() {
               .split('\n');
             const data = [getTeamName(row[1]), getAbbrev(row[4])];
             console.log(data);
+            names.push(data);
             if (data[0].split(' ').length > 1 && notTitle(data[0])) {
               count++;
             }
@@ -177,6 +219,21 @@ var getSchoolNames = function() {
         }
       }
     );
+    return names;
 }
 
-getSchoolNames();
+let getResults = function() {
+  teams = getSchoolNames();
+  // if you print teams, you'll see that it's empty.
+  for (var i = 0; i < teams.length; i++) {
+    var url = teamBaseUrl.concat(teams[i][1]).concat("_college_m_").concat(teams[i][0]);
+    console.log(url);
+    request(url , function(err, resp, body) {
+      if (!err && resp.statusCode == 200) {
+          console.log(body);
+      }
+    })
+  }
+}
+
+getResults();
