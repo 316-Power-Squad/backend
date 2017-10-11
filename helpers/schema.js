@@ -31,7 +31,8 @@ export const Schemas = [
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255) NOT NULL,
     gender ENUM('mens', 'womens') NOT NULL,
-    PRIMARY KEY (ID)
+    PRIMARY KEY (ID),
+    UNIQUE(name, gender)
   )
 `,
   `
@@ -46,7 +47,8 @@ export const Schemas = [
   CREATE TABLE Region (
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255),
-    PRIMARY KEY (ID)
+    PRIMARY KEY (ID),
+    UNIQUE(name)
   )
 `,
   `
