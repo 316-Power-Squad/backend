@@ -117,7 +117,7 @@ const getCalifornia = function(school) {
         splitSchool[splitSchool.length - 1] == "Sacramento" || 
         splitSchool[splitSchool.length - 1] == "Long Beach"
         ) {
-        return splitSchool[splitSchool.length - 1].concat(" State");
+        return splitSchool[splitSchool.length - 1].concat("_State");
       } else {
         return "Cal_St_".concat(splitSchool[splitSchool.length - 1]);
       }
@@ -180,7 +180,13 @@ const getTeamName = function(school) {
     return getTexas(school);
   } if (splitSchool[0] == "Pennsylvania") {
     splitSchool[0] = "Penn";
-  } 
+  } if (school == "University of Mississippi") {
+    return "Ole_Miss";
+  } if (school == 'Mississippi State University') {
+    return 'Miss State';
+  } if (school == 'Colorado Boulder !University of Colorado Boulder') {
+    return 'Colorado';
+  }
   for (var i = 0; i < splitSchool.length; i++) {
       if (splitSchool[i].includes("!")) {
         return usableWords.join("_");
@@ -214,6 +220,12 @@ const getSchoolNames = async () => {
             const data = [getTeamName(row[1]), getAbbrev(row[4])];
             //console.log(data);
             names.push(data);
+            let splitData = data[0].split("_");
+            //console.log(data);
+            if (splitData[splitData.length - 1] == 'State') {
+              splitData[splitData.length - 1] = 'St';
+              names.push(splitData.join('_'));
+            }
             if (data[0].split(' ').length > 1 && notTitle(data[0])) {
               count++;
             }
@@ -227,25 +239,13 @@ const getSchoolNames = async () => {
     )});
 }
 
-const getResults = async () => {
-  const teams = await getSchoolNames();
-    for (var i = 0; i < teams.length; i++) {
-      var url = teamBaseUrl.concat(teams[i][1]).concat("_college_m_").concat(teams[i][0]);
-      //console.log(url);
-      request(url , function(err, resp, body) {
-      if (!err && resp.statusCode == 200) {
-          var $ = cheerio.load(body);
-          $('tr', '.data, .scroll').each(function() {
-            sleep();
-            console.log($(this).find('.date').text());
-            console.log($(this).find('a').attr('href'));
-          });
-      }
-    })
-    }
-  }
   //console.log(teams);
   // if you print teams, you'll see that it's empty.
+const parseDate = function(date) {
+  return new Date(date);
+}
+
+const earliestDate = parseDate('09/08/2017');
 
 const delay = function(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -256,5 +256,77 @@ const sleep = async () => {
   await delay(((Math.random() * 5) + 1) * 1000)
   console.log('Two second later');
 }
+
+const formatDate = function(date) {
+  if (date == "#") {
+    return "01/01/2000";
+  }
+  let parts = date.split('/');
+  // console.log("****************************");
+  // console.log(parts[2]);
+  parts[2] = '20'.concat(parts[2]).replace('\n', '');
+  let result = parts.join('/');
+  // console.log('---------------------------');
+  // console.log(result);
+  // console.log(parts);
+  // console.log('------------------------------')
+  // console.log("*******************************")
+  return result;
+}
+
+const fetchMeets = async (url) => {
+  return new Promise((resolve, reject) => {
+        let meets = new Set();
+        request(url, function(err, resp, body) {
+        if (!err && resp.statusCode == 200) {
+            var $ = cheerio.load(body);
+            $('tr', '.data, .scroll').each(function() {
+              if (!$(this).find('.date').text()) {
+                //console.log("No valid date for this meet: ");
+                //console.log($(this).find('a').attr('href'))
+              } 
+              else {
+                let date = parseDate(formatDate($(this).find('.date').text()));
+                //console.log(date.getTime());
+                //console.log(date);
+                //console.log('-----------------');
+                //console.log(earliestDate.getTime());
+
+                if (date.getTime() >= earliestDate.getTime()) {
+                  //console.log($(this).find('.date').text());
+                  //console.log($(this).find('a').attr('href'));
+                  let meetLink = $(this).find('a').attr('href').replace('//', '');
+                  if (meetLink.includes('www')){
+                      meets.add(meetLink);
+                      //console.log(meets);
+                  }
+                }
+              }
+            });
+        }
+        //console.log(meets);
+        //console.log(url);
+        //console.log(meets);
+        resolve(meets);
+      })
+    });
+}
+
+const getResults = async () => {
+    const teams = await getSchoolNames();
+    let meets = new Set();
+    for (var i = 0; i < teams.length; i++) {
+        let url = teamBaseUrl.concat(teams[i][1]).concat("_college_m_").concat(teams[i][0]);
+        let newMeets = await fetchMeets(url);
+        
+        console.log(newMeets);
+        // if (newMeets.size > 0){
+        //   console.log(newMeets);
+        //   meets.union(newMeets);
+        //   console.log(meets);
+        // }
+      }
+  }
+
 
 getResults();
