@@ -216,7 +216,7 @@ const getSchoolNames = async () => {
             let splitData = data[0].split("_");
             if (splitData[splitData.length - 1] == 'State') {
               splitData[splitData.length - 1] = 'St';
-              names.push(splitData.join('_'));
+              names.push([splitData.join('_'), getAbbrev(row[4])]);
             }
             if (data[0].split(' ').length > 1 && notTitle(data[0])) {
               count++;
@@ -299,33 +299,72 @@ const convertTime = function(time) {
   return minutes + seconds;
 }
 
+const populateTeams = function(t) {
+  for (let i = 0; i < t.length; i++) {
+    teamNames.push(t[i][0]);
+  }
+}
+
 const getResults = async () => {
     const teams = await getSchoolNames();
+    populateTeams(teams);
     let meets = [];
     for (var i = 0; i < 5; i++) {
         let url = teamBaseUrl.concat(teams[i][1]).concat("_college_m_").concat(teams[i][0]);
         let newMeets = await fetchMeets(url);
         meets = joinLists(meets, newMeets);
       }
-    let count = 0;
-    let girlsTeam = false;
-    let guysTeam = false;
-    request(meets[0], function(err, resp, body) { 
-        if (!err && resp.statusCode == 200) {
-          let $ = cheerio.load(body);
-          $('tr').each(function() {
-            const data = $(this);
-            if (count <= 15){
-              console.log('START---------------------');
-              console.log(data.text().split('\n'));
-              console.log(data.find('a').attr('href'));
-              console.log('END------------------------');
-                count++;
-            }
-          })
-        }
-    })
+      return meets;
   }
 
+let teamNames = [];
 
-getResults();
+const mapResults = async () => {
+  let results = new Map();
+  let meets = await getResults();
+  let count = 0;
+  let girlsTeam = false;
+  let guysTeam = false;
+  return new Promise((resolve, reject) => {
+      request(meets[0], function(err, resp, body) { 
+          if (!err && resp.statusCode == 200) {
+            let $ = cheerio.load(body);
+            let mens = new Map();
+            let womens = new Map();
+            results.set(meets[0], [mens, womens]);
+            $('tr').each(function() {
+              const data = $(this);
+              let row = data.text().split('\n');
+              let link = data.find('a').attr('href');
+              if (count <= 11000){
+                try{
+                  let rank = parseInt(row[2]);
+                  let school = row[4].replace(" ", "_").replace(' ', '_').replace('.', '');
+                  // console.log('START---------------------');
+                  // console.log(row);
+                  // console.log(link);
+                  // console.log(school);
+                  // console.log(teamNames.includes(school));
+                  // console.log('END------------------------');
+                  count++;
+
+                  if (teamNames.includes(school)) {
+                      if (link.includes('_f_')) {
+                        results.get(meets[0])[1].set(school, rank);
+                      } else if (link.includes('_m_')) {
+                        results.get(meets[0])[0].set(school, rank);
+                    }
+                  }
+                } catch (error) {
+                  //console.log('invalid data');
+                }
+              }
+            });
+          }
+          console.log(results);
+      });
+  });
+  
+}
+
+mapResults();
