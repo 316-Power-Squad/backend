@@ -4,13 +4,13 @@
 --     mysql -u root -p atlargetest < seed.sql
 
 -- First we make sure our database exists and drop any existing tables.
-DROP TABLE IF EXISTS Team, Region, TeamInRegion, User, Admin, Meet, Participates;
+DROP TABLE IF EXISTS Team, Region, TeamInRegion, AppUser, Admin, Meet, Participates;
 DROP VIEW IF EXISTS TeamWithRegion;
 
--- User's are useful in web applications for handling API permissions, and 
+-- AppUser's are useful in web applications for handling API permissions, and 
 -- in the future we may want to add the ability to associate certain data
--- with the user. For now it is just for the purposes of loggin in / out
-CREATE TABLE User (
+-- with the AppUser. For now it is just for the purposes of loggin in / out
+CREATE TABLE AppUser (
   email varchar(255) NOT NULL,
   name varchar(255) NOT NULL,
   hash varchar(255) NOT NULL,
@@ -59,7 +59,7 @@ CREATE VIEW TeamWithRegion AS (
 );
 
 -- SAMPLE DATA 
-INSERT INTO User (email, name, hash) VALUES 
+INSERT INTO AppUser (email, name, hash) VALUES 
   ('test@example.com', 'Test User', 'hash1'),
   ('test2@example.com', 'Test2 User', 'hash2');
 

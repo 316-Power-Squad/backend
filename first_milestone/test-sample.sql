@@ -1,4 +1,6 @@
 -- This file contains the queries that will represent the API for the site
+-- Executed with: 
+--      mysql -t -u root -p atlargetest < test-sample.sql > test-sample.out
 
 -- USERS
 
