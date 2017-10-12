@@ -28,7 +28,7 @@ const notTitle = function(s) {
 };
 
 const getAbbrev = function(state) {
-  let states = [
+  const states = new Map([
         ['Arizona', 'AZ'],
         ['Alabama', 'AL'],
         ['Alaska', 'AK'],
@@ -82,14 +82,9 @@ const getAbbrev = function(state) {
         ['West Virginia', 'WV'],
         ['Wisconsin', 'WI'],
         ['Wyoming', 'WY'],
-    ];
-
-    for (var i = 0; i < states.length; i++) {
-      if (state == states[i][0]) {
-        return states[i][1];
-      }
-    }
-    return "";
+    ]);
+    let answer = states.get(state);
+    return answer? answer : "";
 }
 
 const getCalifornia = function(school) {
@@ -210,7 +205,6 @@ const getSchoolNames = async () => {
       'https://en.wikipedia.org/wiki/List_of_NCAA_Division_I_institutions',
       function(err, resp, body) {
         if (!err && resp.statusCode == 200) {
-          //console.log('cake');
           var $ = cheerio.load(body);
           var count = 0;
           $('tr', '.sortable').each(function() {
@@ -218,10 +212,8 @@ const getSchoolNames = async () => {
               .text()
               .split('\n');
             const data = [getTeamName(row[1]), getAbbrev(row[4])];
-            //console.log(data);
             names.push(data);
             let splitData = data[0].split("_");
-            //console.log(data);
             if (splitData[splitData.length - 1] == 'State') {
               splitData[splitData.length - 1] = 'St';
               names.push(splitData.join('_'));
@@ -239,8 +231,6 @@ const getSchoolNames = async () => {
     )});
 }
 
-  //console.log(teams);
-  // if you print teams, you'll see that it's empty.
 const parseDate = function(date) {
   return new Date(date);
 }
@@ -262,15 +252,8 @@ const formatDate = function(date) {
     return "01/01/2000";
   }
   let parts = date.split('/');
-  // console.log("****************************");
-  // console.log(parts[2]);
   parts[2] = '20'.concat(parts[2]).replace('\n', '');
   let result = parts.join('/');
-  // console.log('---------------------------');
-  // console.log(result);
-  // console.log(parts);
-  // console.log('------------------------------')
-  // console.log("*******************************")
   return result;
 }
 
@@ -282,31 +265,19 @@ const fetchMeets = async (url) => {
             let $ = cheerio.load(body);
             $('tr', '.data, .scroll').each(function() {
               if (!$(this).find('.date').text()) {
-                //console.log("No valid date for this meet: ");
-                //console.log($(this).find('a').attr('href'))
+                
               } 
               else {
                 let date = parseDate(formatDate($(this).find('.date').text()));
-                //console.log(date.getTime());
-                //console.log(date);
-                //console.log('-----------------');
-                //console.log(earliestDate.getTime());
-
                 if (date.getTime() >= earliestDate.getTime()) {
-                  //console.log($(this).find('.date').text());
-                  //console.log($(this).find('a').attr('href'));
                   let meetLink = $(this).find('a').attr('href').replace('//', '');
                   if (meetLink.includes('www')){
                       meets.push('https://'.concat(meetLink));
-                      //console.log(meets);
                   }
                 }
               }
             });
         }
-        //console.log(meets);
-        //console.log(url);
-        //console.log(meets);
         resolve(meets);
       })
     });
@@ -331,15 +302,11 @@ const convertTime = function(time) {
 const getResults = async () => {
     const teams = await getSchoolNames();
     let meets = [];
-    console.log(meets);
     for (var i = 0; i < 5; i++) {
         let url = teamBaseUrl.concat(teams[i][1]).concat("_college_m_").concat(teams[i][0]);
         let newMeets = await fetchMeets(url);
         meets = joinLists(meets, newMeets);
-        //console.log(meets);
-        // }
       }
-    console.log(meets[0]);
     let count = 0;
     let girlsTeam = false;
     let guysTeam = false;
@@ -348,8 +315,6 @@ const getResults = async () => {
           let $ = cheerio.load(body);
           $('tr').each(function() {
             const data = $(this);
-
-            
             if (count <= 15){
               console.log('START---------------------');
               console.log(data.text().split('\n'));
