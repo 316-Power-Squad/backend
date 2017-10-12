@@ -276,10 +276,10 @@ const formatDate = function(date) {
 
 const fetchMeets = async (url) => {
   return new Promise((resolve, reject) => {
-        let meets = new Set();
+        let meets = [];
         request(url, function(err, resp, body) {
         if (!err && resp.statusCode == 200) {
-            var $ = cheerio.load(body);
+            let $ = cheerio.load(body);
             $('tr', '.data, .scroll').each(function() {
               if (!$(this).find('.date').text()) {
                 //console.log("No valid date for this meet: ");
@@ -297,7 +297,7 @@ const fetchMeets = async (url) => {
                   //console.log($(this).find('a').attr('href'));
                   let meetLink = $(this).find('a').attr('href').replace('//', '');
                   if (meetLink.includes('www')){
-                      meets.add(meetLink);
+                      meets.push('https://'.concat(meetLink));
                       //console.log(meets);
                   }
                 }
@@ -312,20 +312,54 @@ const fetchMeets = async (url) => {
     });
 }
 
+const joinLists = function(list1, list2) {
+  for (let i = 0; i < list2.length; i++) {
+    if (!list1.includes(list2[i])) {
+      list1.push(list2[i]);
+    }
+  }
+  return list1;
+}
+
+const convertTime = function(time) {
+  let splitTime = time.split(':');
+  let minutes = parseInt(splitTime[0]) * 60;
+  let seconds = parseInt(splitTime[1]);
+  return minutes + seconds;
+}
+
 const getResults = async () => {
     const teams = await getSchoolNames();
-    let meets = new Set();
-    for (var i = 0; i < teams.length; i++) {
+    let meets = [];
+    console.log(meets);
+    for (var i = 0; i < 5; i++) {
         let url = teamBaseUrl.concat(teams[i][1]).concat("_college_m_").concat(teams[i][0]);
         let newMeets = await fetchMeets(url);
-        
-        console.log(newMeets);
-        // if (newMeets.size > 0){
-        //   console.log(newMeets);
-        //   meets.union(newMeets);
-        //   console.log(meets);
+        meets = joinLists(meets, newMeets);
+        //console.log(meets);
         // }
       }
+    console.log(meets[0]);
+    let count = 0;
+    let girlsTeam = false;
+    let guysTeam = false;
+    request(meets[0], function(err, resp, body) { 
+        if (!err && resp.statusCode == 200) {
+          let $ = cheerio.load(body);
+          $('tr').each(function() {
+            const data = $(this);
+
+            
+            if (count <= 15){
+              console.log('START---------------------');
+              console.log(data.text().split('\n'));
+              console.log(data.find('a').attr('href'));
+              console.log('END------------------------');
+                count++;
+            }
+          })
+        }
+    })
   }
 
 
