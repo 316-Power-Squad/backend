@@ -178,9 +178,13 @@ const getTeamName = function(school) {
   } if (school == "University of Mississippi") {
     return "Ole_Miss";
   } if (school == 'Mississippi State University') {
-    return 'Miss State';
+    return 'Miss_State';
   } if (school == 'Colorado Boulder !University of Colorado Boulder') {
     return 'Colorado';
+  } if (school.includes('Virginia Tech')) {
+    return 'Virginia_Tech';
+  } if (school.includes('East Tennessee State University')) {
+    return 'East_Tenn_St'
   }
   for (var i = 0; i < splitSchool.length; i++) {
       if (splitSchool[i].includes("!")) {
@@ -211,7 +215,7 @@ const getSchoolNames = async () => {
             const row = $(this)
               .text()
               .split('\n');
-            const data = [getTeamName(row[1]), getAbbrev(row[4])];
+            const data = [getTeamName(row[1]).split(' ').join('_'), getAbbrev(row[4])];
             names.push(data);
             let splitData = data[0].split("_");
             if (splitData[splitData.length - 1] == 'State') {
@@ -336,7 +340,7 @@ const scrapeResult = async(meet) => {
               if (count <= 11000){
                 try{
                   let rank = parseInt(row[2]);
-                  let school = row[4].split(' ').join('_').replace('.', '');
+                  let school = row[4].split(' ').join('_').split('.').join('');
                   // console.log('START---------------------');
                   // console.log(row);
                   // console.log(link);
