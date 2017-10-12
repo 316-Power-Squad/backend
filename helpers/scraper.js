@@ -319,19 +319,16 @@ const getResults = async () => {
 
 let teamNames = [];
 
-const mapResults = async () => {
-  let results = new Map();
-  let meets = await getResults();
-  let count = 0;
-  let girlsTeam = false;
-  let guysTeam = false;
-  return new Promise((resolve, reject) => {
-      request(meets[0], function(err, resp, body) { 
+const scrapeResult = async(meet) => {
+    return new Promise((resolve, reject) => {
+        request(meet, function(err, resp, body) { 
+          let results = new Map();
+          let count = 0;
           if (!err && resp.statusCode == 200) {
             let $ = cheerio.load(body);
             let mens = new Map();
             let womens = new Map();
-            results.set(meets[0], [mens, womens]);
+            results.set(meet, [mens, womens]);
             $('tr').each(function() {
               const data = $(this);
               let row = data.text().split('\n');
@@ -339,7 +336,7 @@ const mapResults = async () => {
               if (count <= 11000){
                 try{
                   let rank = parseInt(row[2]);
-                  let school = row[4].replace(" ", "_").replace(' ', '_').replace('.', '');
+                  let school = row[4].split(' ').join('_').replace('.', '');
                   // console.log('START---------------------');
                   // console.log(row);
                   // console.log(link);
@@ -350,9 +347,9 @@ const mapResults = async () => {
 
                   if (teamNames.includes(school)) {
                       if (link.includes('_f_')) {
-                        results.get(meets[0])[1].set(school, rank);
+                        results.get(meet)[1].set(school, rank);
                       } else if (link.includes('_m_')) {
-                        results.get(meets[0])[0].set(school, rank);
+                        results.get(meet)[0].set(school, rank);
                     }
                   }
                 } catch (error) {
@@ -361,9 +358,21 @@ const mapResults = async () => {
               }
             });
           }
-          console.log(results);
+          //console.log(results);
+          resolve(results);
       });
-  });
+    })
+}
+
+const mapResults = async () => {
+  let results = new Map();
+  let meets = await getResults();
+  let count = 0;
+  for (let i = 0; i < meets.length; i++) {
+      let newResult = await scrapeResult(meets[i]);
+      results = new Map([...results, ...newResult]);
+   }
+   console.log(results);
   
 }
 
