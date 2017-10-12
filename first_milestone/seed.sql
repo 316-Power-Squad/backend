@@ -1,4 +1,6 @@
--- In this file we define the schema for the database and create the tables.
+-- In this file we define the schema for the database and create the tables. Note
+-- that there is some mysql specific code in this file. For example, in postgres
+-- we would say "SERIAL" instead of "int NOT NULL AUTO_INCREMENT"
 -- You can run the file with the following command:
 --
 --     mysql -u root -p atlargetest < seed.sql
@@ -40,7 +42,7 @@ CREATE TABLE Region (
 CREATE TABLE Meet (
   ID int NOT NULL AUTO_INCREMENT,
   name varchar(255),
-  date date,
+  meet_date date,
   PRIMARY KEY (ID)
 );
 -- Description of Participates
@@ -96,7 +98,7 @@ INSERT INTO TeamInRegion (team_id, region_id, team_rank) VALUES
   (8, 3, 2),
   (9, 3, 3);
 
-INSERT INTO Meet (name, date) VALUES
+INSERT INTO Meet (name, meet_date) VALUES
   ('battle_in_beantown', '2017-09-10'),
   ('panorama_farms', '2017-09-18'),
   ('princeton_invitational', '2017-09-30'),
