@@ -12,9 +12,10 @@ import db from './db';
 export const createDatabaseQueries = [
   `CREATE DATABASE IF NOT EXISTS atlargetest`,
   `CREATE DATABASE IF NOT EXISTS atlargeprod`,
+  `DROP VIEW IF EXISTS TeamWithRegion`,
 ];
 
-export const dropQuery = `DROP TABLE IF EXISTS Team, User, Admin, Meet, Participates, RegionalRank`;
+export const dropQuery = `DROP TABLE IF EXISTS Team, Region, TeamInRegion, User, Admin, Meet, Participates`;
 
 export const Schemas = [
   `
@@ -26,25 +27,35 @@ export const Schemas = [
   )
 `,
   `
-  CREATE TABLE Admin (
-    email varchar(255) NOT NULL REFERENCES User(email),
-    PRIMARY KEY (email)
+  CREATE TABLE Team (
+    ID int NOT NULL AUTO_INCREMENT,
+    name varchar(255) NOT NULL,
+    gender ENUM('mens', 'womens') NOT NULL,
+    PRIMARY KEY (ID),
+    UNIQUE(name, gender)
   )
 `,
   `
-  CREATE TABLE Team (
+  CREATE TABLE TeamInRegion (
+    team_id int NOT NULL REFERENCES Team(id),
+    region_id int NOT NULL REFERENCES Region(id),
+    team_rank int NOT NULL,
+    PRIMARY KEY (team_id, region_id)
+  )
+`,
+  `
+  CREATE TABLE Region (
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255),
-    gender ENUM('mens', 'womens'),
-    region varchar(255),
-    PRIMARY KEY (ID)
+    PRIMARY KEY (ID),
+    UNIQUE(name)
   )
 `,
   `
   CREATE TABLE Meet (
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255),
-    date datetime,
+    date date,
     PRIMARY KEY (ID)
   )
 `,
@@ -54,13 +65,6 @@ export const Schemas = [
     meet_id int NOT NULL REFERENCES Meet(id),
     placement int,
     PRIMARY KEY (team_id, meet_id)
-  )
-`,
-  `
-  CREATE TABLE RegionalRank (
-    team_id int NOT NULL REFERENCES Team(id),
-    rank int,
-    PRIMARY KEY (team_id)
   )
 `,
 ];
