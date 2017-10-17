@@ -77,6 +77,11 @@ const drop = (tables, done) => {
   );
 };
 
+connect(MODE_TEST, () => {
+  return
+});
+
+
 export default {
   connect,
   get,
