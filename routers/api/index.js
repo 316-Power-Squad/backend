@@ -1,5 +1,6 @@
 import teamRouter from './Team';
 import meetRouter from './Meet';
+import regionRouter from './Region';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { jwtAuthError, jwtNotProvidedError } from '../../helpers/errors';
@@ -34,5 +35,6 @@ router.use((req, res, next) => {
 
 router.use('/teams', teamRouter);
 router.use('/meets', meetRouter);
+router.use('/regions', regionRouter);
 
 export default router;

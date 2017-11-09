@@ -12,10 +12,9 @@ import db from './db';
 export const createDatabaseQueries = [
   `CREATE DATABASE IF NOT EXISTS atlargetest`,
   `CREATE DATABASE IF NOT EXISTS atlargeprod`,
-  `DROP VIEW IF EXISTS TeamWithRegion`,
 ];
 
-export const dropQuery = `DROP TABLE IF EXISTS Team, Region, TeamInRegion, User, Admin, Meet, Participates`;
+export const dropQuery = `DROP TABLE IF EXISTS Team, Region, TeamInRegion, User, Admin, Meet, Participates, TeamWithRegion`;
 
 export const Schemas = [
   `
@@ -68,6 +67,16 @@ export const Schemas = [
 `,
 ];
 
+export const Views = [
+  `
+  CREATE VIEW TeamWithRegion AS (
+    SELECT Team.name AS team_name, Team.gender, TeamInRegion.team_rank, Region.name AS region 
+    FROM Team, TeamInRegion, Region 
+    WHERE Team.id = TeamInRegion.team_id AND TeamInRegion.region_id = Region.id
+  )
+`,
+];
+
 const dropAndReseed = done => {
   db.get().query(dropQuery, err => {
     if (err) done(err);
@@ -81,6 +90,16 @@ const dropAndReseed = done => {
       );
     }
   });
+};
+
+const createViews = done => {
+  async.each(
+    Views,
+    (viewQuery, cb) => {
+      db.get().query(viewQuery, cb);
+    },
+    done
+  );
 };
 
 // Create a separate connection for creating the database
@@ -102,7 +121,9 @@ export const seed = (mode, done) => {
         },
         () => {
           initialConnection.end();
-          dropAndReseed(done);
+          dropAndReseed(() => {
+            createViews(done);
+          });
         }
       );
     }
