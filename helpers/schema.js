@@ -4,17 +4,17 @@
  */
 import async from 'async';
 import mysql from 'mysql';
-import db from './db';
+import db, { MODE_TEST, MODE_PRODUCTION, TEST_DB, PRODUCTION_DB } from './db';
 
 // Put all table creation code here. Make sure to include the line where we drop
 // the table if it exists - otherwise our create table query will fail
 
 export const createDatabaseQueries = [
-  `CREATE DATABASE IF NOT EXISTS atlargetest`,
-  `CREATE DATABASE IF NOT EXISTS atlargeprod`,
+  `DROP DATABASE IF EXISTS atlargetest`,
+  `DROP DATABASE IF EXISTS atlargeprod`,
+  `CREATE DATABASE atlargetest`,
+  `CREATE DATABASE atlargeprod`,
 ];
-
-export const dropQuery = `DROP TABLE IF EXISTS Team, Region, TeamInRegion, User, Admin, Meet, Participates, TeamWithRegion`;
 
 export const Schemas = [
   `
@@ -45,7 +45,7 @@ export const Schemas = [
   `
   CREATE TABLE Region (
     ID int NOT NULL AUTO_INCREMENT,
-    name varchar(255),
+    name varchar(255) NOT NULL,
     PRIMARY KEY (ID),
     UNIQUE(name)
   )
@@ -53,7 +53,7 @@ export const Schemas = [
   `
   CREATE TABLE Meet (
     ID int NOT NULL AUTO_INCREMENT,
-    name varchar(255),
+    name varchar(255) NOT NULL,
     PRIMARY KEY (ID)
   )
 `,
@@ -77,31 +77,6 @@ export const Views = [
 `,
 ];
 
-const dropAndReseed = done => {
-  db.get().query(dropQuery, err => {
-    if (err) done(err);
-    else {
-      async.each(
-        Schemas,
-        (schema, cb) => {
-          db.get().query(schema, cb);
-        },
-        done
-      );
-    }
-  });
-};
-
-const createViews = done => {
-  async.each(
-    Views,
-    (viewQuery, cb) => {
-      db.get().query(viewQuery, cb);
-    },
-    done
-  );
-};
-
 // Create a separate connection for creating the database
 const initialConnection = mysql.createConnection({
   host: 'localhost',
@@ -111,6 +86,36 @@ const initialConnection = mysql.createConnection({
 
 // This is what callback hell looks like - should use async / await
 export const seed = (mode, done) => {
+  const seedConnection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: process.env.MYSQL_PASSWORD,
+    database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB,
+  });
+
+  const reseed = done => {
+    async.each(
+      Schemas,
+      (schema, cb) => {
+        seedConnection.query(schema, cb);
+      },
+      done
+    );
+  };
+
+  const createViews = done => {
+    async.each(
+      Views,
+      (viewQuery, cb) => {
+        seedConnection.query(viewQuery, cb);
+      },
+      () => {
+        seedConnection.end();
+        done();
+      }
+    );
+  };
+
   db.connect(mode, err => {
     if (err) done(err);
     else {
@@ -121,7 +126,7 @@ export const seed = (mode, done) => {
         },
         () => {
           initialConnection.end();
-          dropAndReseed(() => {
+          reseed(() => {
             createViews(done);
           });
         }

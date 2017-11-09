@@ -286,12 +286,11 @@ const formatDate = function(date) {
 
 const fetchMeets = async url => {
   return new Promise((resolve, reject) => {
-    let meets = [];
+    let meets = new Map();
     request(url, async (err, resp, body) => {
       let splitUrl = url.split('_');
       let team = splitUrl.splice(3, splitUrl.length).join('_');
-      console.log(team);
-      if (!err && resp.statusCode == 200) {
+      if (!err && resp.statusCode == 200 && team) {
         let $ = cheerio.load(body);
         $('a', '.headleague').each(async () => {
           let splitRegion = $(this)
@@ -322,12 +321,15 @@ const fetchMeets = async url => {
               )
             );
             if (date.getTime() >= earliestDate.getTime()) {
-              let meetLink = $(this)
+              const meetLink = $(this)
                 .find('a')
                 .attr('href')
                 .replace('//', '');
+              const meetName = $(this)
+                .find('a')
+                .text();
               if (meetLink.includes('www')) {
-                meets.push('https://'.concat(meetLink));
+                meets.set(meetName, 'https://'.concat(meetLink));
               }
             }
           }
@@ -365,30 +367,37 @@ const populateTeams = function(t) {
 const getResults = async () => {
   const teams = await getSchoolNames();
   let teamNames = populateTeams(teams);
-  let meets = [];
+  let meets = new Map();
   for (var i = 0; i < teams.length; i++) {
+    if (teams[i][0] === 'School') continue;
+    try {
+      await insertTeam(teams[i][0], 'mens');
+      await insertTeam(teams[i][0], 'womens');
+    } catch (err) {
+      console.log(`Error inserting team ${teams[i][0]}`);
+    }
     let url = teamBaseUrl
       .concat(teams[i][1])
       .concat('_college_m_')
       .concat(teams[i][0]);
     let newMeets = await fetchMeets(url);
-    meets = joinLists(meets, newMeets);
+    meets = new Map([...meets, ...newMeets]);
   }
   return meets;
 };
 
-const scrapeResult = async meet => {
+const scrapeResult = async (meetUrl, meetName) => {
   const teams = await getSchoolNames();
   let teamNames = populateTeams(teams);
   return new Promise((resolve, reject) => {
-    request(meet, function(err, resp, body) {
+    request(meetUrl, function(err, resp, body) {
       let results = new Map();
       let count = 0;
       if (!err && resp.statusCode == 200) {
         let $ = cheerio.load(body);
         let mens = new Map();
         let womens = new Map();
-        results.set(meet, [mens, womens]);
+        results.set(meetName, [mens, womens]);
         $('tr').each(function() {
           const data = $(this);
           let row = data.text().split('\n');
@@ -405,9 +414,9 @@ const scrapeResult = async meet => {
 
               if (teamNames.includes(school)) {
                 if (link.includes('_f_')) {
-                  results.get(meet)[1].set(school, rank);
+                  results.get(meetName)[1].set(school, rank);
                 } else if (link.includes('_m_')) {
-                  results.get(meet)[0].set(school, rank);
+                  results.get(meetName)[0].set(school, rank);
                 }
               }
             } catch (error) {}
@@ -419,9 +428,10 @@ const scrapeResult = async meet => {
   });
 };
 
-const insertMeet = async meet => {
+const insertMeet = async name => {
+  console.log(`Inserting a meet ${name}`);
   return new Promise((resolve, reject) => {
-    db.get().query(`INSERT INTO Meet (name) values (?)`, [meet], err => {
+    db.get().query(`INSERT INTO Meet (name) values (?)`, [name], err => {
       if (err) reject(err);
       else resolve();
     });
@@ -445,6 +455,9 @@ const insertTeam = async (name, gender) => {
 };
 
 const insertParticipates = async (meet, team, gender, place) => {
+  console.log(
+    `Inserting a participates record ${meet}, ${team}, ${gender}, ${place}`
+  );
   return new Promise((resolve, reject) => {
     let query = `INSERT INTO Participates (team_id, meet_id, placement) values (
       (SELECT ID FROM Team WHERE name=? and gender=?),
@@ -459,47 +472,55 @@ const insertParticipates = async (meet, team, gender, place) => {
 };
 
 const mapResults = async () => {
-  let results = new Map();
-  let meets = await getResults();
-  let count = 0;
-  for (let i = 0; i < 10; i++) {
-    await insertMeet(meets[i]);
-    let newResult = await scrapeResult(meets[i]);
-    results = new Map([...results, ...newResult]);
-  }
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    let results = new Map();
+    const meets = await getResults();
+    for (let [meetName, meetUrl] of meets) {
+      try {
+        await insertMeet(meetName);
+      } catch (err) {
+        console.log('Error inserting meet', err);
+      }
+      console.log('Scraping ', meetUrl);
+      let newResult = await scrapeResult(meetUrl, meetName);
+      results = new Map([...results, ...newResult]);
+    }
     resolve(results);
   });
 };
 
 const insertResults = async () => {
-  let results = await mapResults();
-  console.log(results);
-  for (let meet of results.keys()) {
-    let r = results.get(meet);
-    console.log(meet);
-    for (let mensTeam of r[0].keys()) {
-      try {
-        await insertParticipates(meet, mensTeam, 'mens', r[0].get(mensTeam));
-      } catch (err) {
-        console.log(`Error inserting men's participation`, err);
+  return new Promise(async (resolve, reject) => {
+    let results = await mapResults();
+    console.log(results);
+    for (let meet of results.keys()) {
+      let r = results.get(meet);
+      console.log(meet);
+      for (let mensTeam of r[0].keys()) {
+        try {
+          await insertParticipates(meet, mensTeam, 'mens', r[0].get(mensTeam));
+        } catch (err) {
+          console.log(`Error inserting men's participation`, err);
+        }
+      }
+      for (let womensTeam of r[1].keys()) {
+        try {
+          await insertParticipates(
+            meet,
+            womensTeam,
+            'womens',
+            r[1].get(womensTeam)
+          );
+        } catch (err) {
+          console.log(`Error inserting women's participation`, err);
+        }
       }
     }
-    for (let womensTeam of r[1].keys()) {
-      try {
-        await insertParticipates(
-          meet,
-          womensTeam,
-          'womens',
-          r[1].get(womensTeam)
-        );
-      } catch (err) {
-        console.log(`Error inserting women's participation`, err);
-      }
-    }
-  }
+    resolve();
+  });
 };
 
-db.connect(MODE_TEST, () => {
-  insertResults();
+db.connect(MODE_TEST, async () => {
+  await insertResults();
+  db.disconnect();
 });
