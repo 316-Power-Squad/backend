@@ -1,8 +1,8 @@
 import mysql from 'mysql';
 import async from 'async';
 
-const PRODUCTION_DB = 'atlargeprod';
-const TEST_DB = 'atlargetest';
+export const PRODUCTION_DB = 'atlargeprod';
+export const TEST_DB = 'atlargetest';
 
 export const MODE_TEST = 'MODE_TEST';
 export const MODE_PRODUCTION = 'MODE_PRODUCTION';

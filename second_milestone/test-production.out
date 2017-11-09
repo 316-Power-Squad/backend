@@ -1,0 +1,95 @@
++----+--------------------------------------------------------+
+| ID | name                                                   |
++----+--------------------------------------------------------+
+|  1 | Southland Conference Cross Country Championships       |
+|  2 | adidas DI Pre Nationals                                |
+|  3 | ROY GRIAK INVITATIONAL                                 |
+|  4 | ACU Naimadu - ACU v UIW                                |
+|  5 | ACU Naimadu - ACU v SFA                                |
+|  6 | 2017 Mid-American Conference XC Championships          |
+|  7 | Penn State National Open                               |
+|  8 | All Ohio Championships 2017                            |
+|  9 | 2017 Virgina Tech Alumni Invitational                  |
+| 10 | SEC Championships                                      |
+| 11 | Crimson Classic                                        |
+| 12 | Joe Piane Notre Dame Invitational                      |
+| 13 | UCR Invitational                                       |
+| 14 | 2017 SWAC Cross Country Championships                  |
+| 15 | JSU Foothills Cross Country Invitational               |
+| 16 | Falcon Classic                                         |
+| 17 | Azalea City Classic                                    |
+| 18 | America East Conference CC Run Championship (UVM host) |
+| 19 | 51st Annual UAlbany XC Invite                          |
+| 20 | Paul Short Gold                                        |
+| 21 | Paul Short Open                                        |
+| 22 | Coast-To-Coast Battle in Beantown                      |
+| 23 | Mississippi College Invitational                       |
+| 24 | Mississippi College/Watson Ford Invitational           |
+| 25 | McNeese State Cowboy Stampede Invite                   |
+| 26 | LSU Invitational-Collegiate Division                   |
+| 27 | Patriot League Cross Country Championships             |
+| 28 | Princeton XC Invitational                              |
+| 29 | George Mason Cross Country Invitational                |
+| 30 | 2017 Navy XC Invitational                              |
+| 31 | 2017 Salty Dog Invitational                            |
+| 32 | 2017 Sun Belt Conference Cross Country Championships   |
+| 33 | High Point University Vertcross 2017                   |
+| 34 | Upstate Invitational 2017                              |
+| 35 | Mountain to Sea Open CC Meet                           |
+| 36 | Pac-12 Championships                                   |
+| 37 | Dave Murray Invitational                               |
+| 38 | Missouri Southern Stampede                             |
+| 39 | Iona College Meet of Champions                         |
+| 40 | Little Rock Inv - Oral Roberts v UALR                  |
+| 41 | Little Rock Inv - UALR v Arkansas State                |
+| 42 | Little Rock Inv - UCA v UALR                           |
+| 43 | Little Rock Inv - UAPB v UALR                          |
+| 44 | UCA XC Open                                            |
+| 45 | Little Rock Inv - Oral Roberts v UAPB                  |
+| 46 | Little Rock Inv - UAPB v Arkansas State                |
+| 47 | Little Rock Inv - UCA v UAPB                           |
+| 48 | Southern Arkansas University Lois Davis Invitational   |
+| 49 | Mook Triple Dual Invitational                          |
+| 50 | Little Rock Inv - Oral Roberts v Arkansas State        |
++----+--------------------------------------------------------+
++----+
+| id |
++----+
+| 22 |
++----+
+
++-----------+-----------+
+| team_name | placement |
++-----------+-----------+
+| syracuse  |         1 |
+| iona      |         2 |
+| cornell   |         3 |
++-----------+-----------+
+
++----+
+| id |
++----+
+| 47 |
++----+
+
++---------------------------------+
+| name                            |
++---------------------------------+
+| adidas DI Pre Nationals         |
+| Louisville Classic              |
+| ACC Cross Country Championships |
+| John McNichols Invitational     |
++---------------------------------+
++----+--------------+
+| ID | name         |
++----+--------------+
+|  6 | greatlakes   |
+|  2 | midatlantic  |
+|  7 | midwest      |
+|  8 | mountain     |
+|  1 | northeast    |
+|  4 | south        |
+|  5 | southcentral |
+|  3 | southeast    |
+|  9 | west         |
++----+--------------+

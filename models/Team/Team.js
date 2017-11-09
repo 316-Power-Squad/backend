@@ -6,19 +6,17 @@ import { sqlError } from '../../helpers/db';
 import { noTeamError, nameError } from './errors';
 
 export const getTeam = (id, done) => {
-  db
-    .get()
-    .query(`SELECT * FROM TeamWithRegion WHERE id=?`, [id], (err, rows) => {
-      if (err) return done({}, sqlError);
-      else if (rows.length === 0) {
-        return done({}, noTeamError);
-      }
-      done(rows[0]);
-    });
+  db.get().query(`SELECT * FROM Team WHERE id=?`, [id], (err, rows) => {
+    if (err) return done({}, sqlError);
+    else if (rows.length === 0) {
+      return done({}, noTeamError);
+    }
+    done(rows[0]);
+  });
 };
 
 export const allTeams = done => {
-  db.get().query(`SELECT * FROM TeamWithRegion`, (err, rows) => {
+  db.get().query(`SELECT * FROM Team`, (err, rows) => {
     if (err) return done([], sqlError);
     done(rows);
   });
