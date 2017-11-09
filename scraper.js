@@ -428,6 +428,28 @@ const scrapeResult = async (meetUrl, meetName) => {
   });
 };
 
+const insertRegions = async region => {
+  console.log(`Inserting Regions`);
+  return new Promise((resolve, reject) => {
+    db.get().query(`INSERT INTO Region (name) values
+      ('northeast'),
+      ('midatlantic'),
+      ('southeast'),
+      ('south'),
+      ('southcentral'),
+      ('greatlakes'),
+      ('midwest'),
+      ('mountain'),
+      ('west')
+    `,
+    [],
+    err => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+};
+
 const insertMeet = async name => {
   console.log(`Inserting a meet ${name}`);
   return new Promise((resolve, reject) => {
@@ -493,6 +515,7 @@ const insertResults = async () => {
   return new Promise(async (resolve, reject) => {
     let results = await mapResults();
     console.log(results);
+    await insertRegions();
     for (let meet of results.keys()) {
       let r = results.get(meet);
       console.log(meet);

@@ -46,6 +46,7 @@ WHERE Meet.id = Participates.meet_id AND
 SELECT * FROM Region; 
 
 -- Get all teams and their rank in a given region (in this case the northeast)
+-- Doesn't work currently because we don't have team ranks
 SELECT team_name, team_rank
 FROM TeamWithRegion
 WHERE region='northeast';
@@ -56,6 +57,7 @@ WHERE region='northeast';
 -- two teams that are getting automatic bids to nationals). This will be used
 -- by our algorithm to determine which teamns will get an at large bid into
 -- the national tournament
+-- Doesn't work currently because we don't have team ranks
 SELECT t1.team_name, t1.region, t1.team_rank  
 FROM TeamWithRegion AS t1 JOIN TeamWithRegion AS t2
   ON t1.region = t2.region AND 
