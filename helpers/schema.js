@@ -55,7 +55,6 @@ export const Schemas = [
   CREATE TABLE Meet (
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255),
-    date date,
     PRIMARY KEY (ID)
   )
 `,
@@ -63,7 +62,7 @@ export const Schemas = [
   CREATE TABLE Participates (
     team_id int NOT NULL REFERENCES Team(id),
     meet_id int NOT NULL REFERENCES Meet(id),
-    placement int,
+    placement int NOT NULL,
     PRIMARY KEY (team_id, meet_id)
   )
 `,
