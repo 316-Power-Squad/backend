@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon index.js --exec babel-node --presets  es2015,stage-2",
     "scrape": "babel-node scraper.js --presets es2015,stage-2",
+    "rank": "babel-node kolas_algorithm.js --presets es2015,stage-2",
     "seed": "babel-node seed.js --presets es2015,stage-2",
     "test": "jest"
   },
