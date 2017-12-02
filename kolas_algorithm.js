@@ -1,15 +1,15 @@
 import db, { MODE_TEST } from './helpers/db';
 
 let regionals    = {
-great_lakes   : ['Michigan', 'Wisconsin', 'Michigan State', 'Ohio State', 'Eastern Michigan', 'Indiana', 'Toledo', 'Miami (Ohio)', 'Notre Dame', 'Purdue', 'Dayton', 'Oakland', 'Marquette', 'Xavier  (Ohio)', 'Central Michigan'],  // PROJECTED
-mid_atlantic  : ['Villanova', 'Penn State', 'Georgetown', 'West Virginia', 'Princeton', 'Pittsburgh', 'Penn', 'Bucknell', 'Navy', 'Maryland', 'Lehigh', 'American', 'Temple', 'Delaware', 'Duquesne'],  // PROJECTED
-midwest       : ['Minnesota', 'Iowa State', 'Oklahoma State', 'Missouri', 'Northwestern', 'Bradley', 'South Dakota', 'Kansas', 'Oklahoma', 'Tulsa', 'Northern Iowa', 'Northern Illinois', 'Loyola-Chicago', 'Iowa', 'Creighton'],  // PROJECTED
-mountain      : ['Colorado', 'New Mexico', 'Utah State', 'BYU', 'Northern Arizona', 'Utah', 'Air Force', 'Nevada', 'Montana State', 'Colorado St.', 'UTEP', 'Southern Utah', 'Idaho State', 'Weber State', 'Utah Valley'],  // PROJECTED
-northeast     : ['Providence', 'Columbia', 'Dartmouth', 'Syracuse', 'Yale', 'Cornell', 'Connecticut', 'Iona', 'Brown', 'New Hampshire', 'Buffalo', 'Army West Point', 'Boston College', 'UMass Lowell', 'Sacred Heart'],  // PROJECTED
-south         : ['Georgia', 'Ole Miss', 'Miss State', 'Alabama', 'Florida State', 'Vanderbilt', 'Samford', 'Georgia Tech', 'Belmont', 'North Florida', 'Southern Miss.', 'Lipscomb', 'UAB', 'Tennessee', 'Jacksonville'],  // PROJECTED
-south_central : ['Arkansas', 'Abilene Christian', 'Texas', 'Baylor', 'SMU', 'Lamar', 'Texas A&M', 'McNeese State', 'TCU', 'Rice', 'Tulane', 'North Texas', 'Texas State', 'Texas A&M-Corpus Christi', 'Stephen F. Austin'],  // PROJECTED
-southeast     : ['North Carolina St.', 'Furman', 'Eastern Kentucky', 'Louisville', 'Virginia Tech', 'Wake Forest', 'Duke', 'Virginia', 'Kentucky', 'Charlotte', 'James Madison', 'North Carolina', 'Richmond', 'Davidson', 'William and Mary'],  // PROJECTED
-west          : ['Oregon', 'Stanford', 'San Francisco', 'Boise State', 'Washington', 'California', 'Arizona', 'UCLA', 'Arizona State', 'Loyola Marymount', 'Portland', 'Washington St.', 'Oregon State', 'UC Santa Barbara', 'Cal Poly'],  // PROJECTED
+great_lakes   : ['Michigan', 'Michigan State', 'Wisconsin', 'Eastern Michigan', 'Indiana', 'Notre Dame', 'Ohio State', 'Dayton', 'Toledo', 'Purdue',  'Miami (Ohio)', 'Marquette', 'Indiana State', 'Xavier  (Ohio)', 'Oakland'],  // PROJECTED
+mid_atlantic  : ['Penn State', 'Villanova', 'Georgetown', 'Princeton', 'Pittsburgh', 'Penn', 'West Virginia', 'Bucknell', 'Maryland', 'Temple', 'Duquesne', 'Navy', 'St. Josephs', 'Lehigh', 'American'],  // PROJECTED
+midwest       : ['Iowa State', 'Oklahoma State', 'Minnesota', 'Missouri', 'South Dakota', 'Bradley', 'Northern Iowa', 'Tulsa', 'Northwestern', 'Kansas', 'Northern Illinois', 'Iowa', 'Oklahoma', 'Creighton', 'South Dakota St.'],  // PROJECTEDx
+mountain      : ['Colorado', 'New Mexico', 'BYU', 'Utah State', 'Utah', 'Air Force', 'Colorado St.', 'Northern Arizona', 'Nevada', 'Montana State', 'Weber State', 'Idaho State', 'Utah Valley', 'UTEP', 'Wyoming'],  // PROJECTED
+northeast     : ['Providence', 'Dartmouth', 'Syracuse', 'Columbia', 'Yale', 'Iona', 'Brown',  'Cornell', 'New Hampshire', 'Buffalo',  'Marist', 'Harvard', 'UMass Lowell', 'Boston College', 'UMass Amherst'],  // PROJECTED
+south         : ['Ole Miss', 'Georgia', 'Samford', 'Florida State', 'Georgia Tech', 'Auburn', 'Miss State', 'Vanderbilt', 'Alabama', 'Tennessee', 'Jacksonville', 'Southern Miss.', 'North Florida', 'Belmont', 'UAB'],  // PROJECTED
+south_central : ['Arkansas', 'Texas', 'Baylor', 'SMU', 'Abilene Christian', 'Texas A&M', 'TCU', 'Tulane', 'North Texas', 'Lamar', 'Rice', 'McNeese State', 'Texas State', 'LSU', 'Arkansas State'],  // PROJECTED
+southeast     : ['North Carolina St.', 'Furman', 'Eastern Kentucky', 'Virginia Tech', 'Louisville', 'Wake Forest', 'Virginia', 'Richmond', 'Davidson', 'Duke', 'Kentucky', 'James Madison', 'North Carolina', 'Charlotte', 'Elon'],  // PROJECTED
+west          : ['San Francisco', 'Stanford', 'Oregon', 'Boise State', 'California', 'Washington', 'Arizona', 'San Jose St.', 'Arizona State', 'Portland', 'Loyola Marymount', 'UCLA', 'Oregon State', 'Idaho', 'Washington St.']  // PROJECTED
 }
 
 
@@ -135,10 +135,11 @@ let selectTeam = function(cur_data,region,ind,awardpoints) {
   d2.teamsin.push(selected);
   d2.curr_inds[region] += 1;
   if (!awardpoints){
-    d2.messages.push(d2.teamsin.length + ": " + selected + " (#" + d2.curr_inds[region] + " " + region + ") is selected, gives no points (pushed in)\n");
-    console.log("no awardpoints");
+    d2.messages.push("\n" + d2.teamsin.length + ": " + selected + " (#" + d2.curr_inds[region] + " " + region + ") is selected, gives no points (pushed in)\n");
+    // console.log("no awardpoints");
     return d2;
   }
+  //Awarding points
   d2.messages.push(d2.teamsin.length + ": " + selected + " (#" + d2.curr_inds[region] + " " + region + ") is selected");
   let beatme = {}; //map meet to list of teams that beat me there
   let sorted_meets = Object.keys(meets).sort();
@@ -153,10 +154,12 @@ let selectTeam = function(cur_data,region,ind,awardpoints) {
     let beatmetemp = [];
   //   # iterate through teams that beat me here, but don't bother listing a team if it's already
   //   #   been selected or if it's in the top 2 in its region
+    // console.log("l for " + m + " is " + l);
     for (let j = 0; j < l.length; j++){
-      let t = l[i];
+      let t = l[j];
+      // console.log(t);
       if(t === selected){
-        continue;
+        break;
       }
       let addme = true;
       if(d2.teamsin.indexOf(t) > -1){
@@ -171,12 +174,11 @@ let selectTeam = function(cur_data,region,ind,awardpoints) {
       }
       if(addme){
         beatmetemp.push(t);
-        console.log(selected + " lost to " + t);
       }
     }
     if(beatmetemp.length > 0){
       beatme[m] = beatmetemp;
-      console.log(beatme[m]);
+      // console.log(beatme[m]);
     }
   }
   if(Object.keys(beatme).length == 0){
@@ -216,7 +218,7 @@ let getEligible = function(data){
     }
   }
   return ans.sort(function(a, b) {
-    return a.points - b.points;
+    return data.points[a] - data.points[b];
   }).reverse(); //pick up from print points etc. do the other methods (dowinner, resolveties, printpoints)
 }
 
@@ -276,7 +278,7 @@ let resolveTies = function(oldtied, d){
       }
       let meets_in_msg = [];
       for(let k = 0; k < relevant.length; k++){
-        meets_in_msg.push(relevant[i][1]);
+        meets_in_msg.push(relevant[k][1]);
       }
 
       d.messages.push(" (" + meets_in_msg.join() + ")\n")
@@ -311,14 +313,14 @@ let resolveTies = function(oldtied, d){
         if(teams.indexOf(ti) > -1){
           //add every team ahead of ti as having beat ti
           for(let k = 0; k < teams.indexOf(ti); k++){
-            if(Object.keys(opps).indexOf(teams[k]) < 0){
+            if(!opps.hasOwnProperty(teams[k])){
               opps[teams[k]] = [0,0,0,0];
             }
             opps[teams[k]][2] += 1; //they played i
           }
           //add every team behind ti as having lost to ti
           for(let k = teams.indexOf(ti) + 1; k < teams.length; k++){
-            if(Object.keys(opps).indexOf(teams[k]) < 0){
+            if(!opps.hasOwnProperty(teams[k])){
               opps[teams[k]] = [0,0,0,0];
             }
             opps[teams[k]][0] += 1; //i beat them
@@ -329,14 +331,14 @@ let resolveTies = function(oldtied, d){
         if(teams.indexOf(tj) > -1){
           //add every team ahead of ti as having beat ti
           for(let k = 0; k < teams.indexOf(tj); k++){
-            if(Object.keys(opps).indexOf(teams[k]) < 0){
+            if(!opps.hasOwnProperty(teams[k])){
               opps[teams[k]] = [0,0,0,0];
             }
             opps[teams[k]][3] += 1; //they played j
           }
           //add every team behind ti as having lost to ti
           for(let k = teams.indexOf(tj) + 1; k < teams.length; k++){
-            if(Object.keys(opps).indexOf(teams[k]) < 0){
+            if(!opps.hasOwnProperty(teams[k])){
               opps[teams[k]] = [0,0,0,0];
             }
             opps[teams[k]][1] += 1; //i beat them
@@ -524,7 +526,8 @@ let doWinner = function(d, winner, el){
   let final = pickFrom(d2,tryme);
   if(final == null){
     return null;
-  } // # they did get in on their own
+  }
+  // # they did get in on their own
   // # they didn't get in on their own, so use the push and select both teams
   // # the pushed team gives no points
   d = selectTeam(d,regwin,indwin-1,false);
@@ -543,7 +546,7 @@ let pickFrom = function(d,el){
   }
   let winner = resolveTies(tied, d);
 
-  if(Array.isArray(winner)){
+  if(winner.length > 1){
     // console.log(d.messages.join("") + "\n\n");
     // let results = [];
     // console.log("Couldn't break the tie, please pick from " + winner);
@@ -558,34 +561,41 @@ let pickFrom = function(d,el){
     let choice = winner[0];
 
     let d2 = d.createCopy();
+    d2.messages.push("\nTie between " + winner + " of size " + winner.length + "\n");
     d2.messages.push("Manually broke tie by picking " + choice + "\n\n");
     return doWinner(d2,choice,el);
   }
 
   d.messages.push("\n");
-  return doWinner(d,winner,el);
+  return doWinner(d,winner[0],el);
 }
 
 // # print out the current status of everything
 let printPoints = function(el, data){
   data.messages.push("\nTeams under consideration by points:\n");
-  let pts_to_teams = [];
+  let pts_to_teams = {};
+  // data.messages.push("el:" + el + "\n");
   for (let i = 0; i < el.length; i++){
     let e = el[i];
     let pts = data.points[e];
-    // console.log(e);
-    if (pts_to_teams.indexOf(pts) > -1){
+    if (pts_to_teams.hasOwnProperty(pts)){
+        // data.messages.push("push adding " + e + "\n");
         pts_to_teams[pts].push(e);
     }
-    else
+    else{
+      // data.messages.push("adding " + e + "\n");
       pts_to_teams[pts] = [e];
+    }
   }
 
-  let pts_keys = Object.keys(pts_to_teams).sort().reverse();
+  let pts_keys = Object.keys(pts_to_teams).sort(function(a, b) {
+    return parseInt(a) - parseInt(b);
+  }).reverse();
+  data.messages.push("pts: " + pts_keys + "\n");
   for(let i = 0; i < pts_keys.length; i++){
     let pts = pts_keys[i];
     let teamlist = pts_to_teams[pts];
-    data.messages.push("  " + pts + " "*(3-pts.toString().length) + teamlist.join() + "\n");
+    data.messages.push("  " + pts + " ".repeat((3-pts.toString().length)) + teamlist.join() + "\n");
   }
   data.messages.push("  Others with points: ");
   let all_by_pts = Object.keys(data.points).sort(function(a, b) {
@@ -666,9 +676,10 @@ if(results == null || results.length == 0){
   console.log("There was an error!!");
 }
 else {
-  console.log("\nTeams selected:\n");
-  for (let i = 0; i < results.teamsin.length; i++){
-    console.log(i+1 + " " + results.teamsin[i]);
+  console.log("\nTeams selected in alpha order:\n");
+  let alpha_order_teams = results.teamsin.sort();
+  for (let i = 0; i < alpha_order_teams.length; i++){
+    console.log(i+1 + " " + alpha_order_teams[i]);
   }
   console.log("");
   console.log("");
