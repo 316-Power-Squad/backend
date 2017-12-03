@@ -1,15 +1,19 @@
-import db from './helpers/db';
+import request from 'request';
+import db, { MODE_TEST } from './helpers/db';
 
 export const getTeam = (id) => {
-  db.get().query(`SELECT * FROM Team WHERE id=?`, [id], (err, rows) => {
+  db.get().query(`SELECT * FROM Meet`, (err, rows) => {
+    console.log(err);
     console.log(rows);
   });
 };
 
 export default async () => {
 	return new Promise((resolve, reject) => {
-		getTeam("df");
+    console.log("Starting");
+		insertTeam("df");
 		if (err) {
+      console.log(err);
 			reject({
 				code: 'some_unique_code',
 				message: 'some error message'
@@ -18,3 +22,8 @@ export default async () => {
 		resolve([ /* Array of teams */ ]);
 	})
 }
+
+db.connect(MODE_TEST, async () => {
+  await getTeam("Duke");
+  db.disconnect();
+});
