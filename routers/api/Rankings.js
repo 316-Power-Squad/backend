@@ -1,16 +1,17 @@
 import express from 'express';
 const router = express.Router();
+import Ranking from '../../models/Ranking';
 import { formatResponse } from '../../helpers/api';
-
-const fakeFunction = async () =>
-  Promise.resolve({
-    testing: 'blah',
-  });
 
 router.get('/', async (req, res) => {
   try {
-    const data = await fakeFunction();
-    res.send(formatResponse(data));
+    // const teams = await Ranking.getRegionals('mens');
+    const meets = await Ranking.getMeets('mens');
+    res.send(
+      formatResponse({
+        meets,
+      })
+    );
   } catch (err) {
     res.send(formatResponse({}, err));
   }
