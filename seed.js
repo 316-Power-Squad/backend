@@ -1,8 +1,12 @@
 import { seed } from './helpers/schema';
 import db, { MODE_PRODUCTION, MODE_TEST } from './helpers/db';
 
-// Change this to production to seed the production database
-seed(MODE_TEST, err => {
+const mode =
+  process.argv[process.argv.length - 1] === 'prod'
+    ? MODE_PRODUCTION
+    : MODE_TEST;
+
+seed(mode, err => {
   if (err) console.log(err);
   db.disconnect();
 });
