@@ -30,6 +30,7 @@ export const Schemas = [
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255) NOT NULL,
     gender ENUM('mens', 'womens') NOT NULL,
+    region varchar(255) NOT NULL,
     PRIMARY KEY (ID),
     UNIQUE(name, gender)
   )
@@ -54,6 +55,7 @@ export const Schemas = [
   CREATE TABLE Meet (
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255) NOT NULL,
+    date varchar(255) NOT NULL,
     PRIMARY KEY (ID)
   )
 `,
