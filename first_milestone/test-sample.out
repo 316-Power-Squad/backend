@@ -1,0 +1,61 @@
++----+------------------------+------------+
+| ID | name                   | meet_date  |
++----+------------------------+------------+
+|  1 | battle_in_beantown     | 2017-09-10 |
+|  2 | panorama_farms         | 2017-09-18 |
+|  3 | princeton_invitational | 2017-09-30 |
+|  4 | paul_short             | 2017-10-10 |
++----+------------------------+------------+
++----+
+| id |
++----+
+|  1 |
++----+
++-----------+-----------+
+| team_name | placement |
++-----------+-----------+
+| syracuse  |         1 |
+| iona      |         2 |
+| cornell   |         3 |
++-----------+-----------+
++----+
+| id |
++----+
+|  1 |
++----+
++------------------------+
+| name                   |
++------------------------+
+| princeton_invitational |
+| paul_short             |
++------------------------+
++----+--------------+
+| ID | name         |
++----+--------------+
+|  1 | northeast    |
+|  2 | midatlantic  |
+|  3 | southeast    |
+|  4 | south        |
+|  5 | southcentral |
+|  6 | greatlakes   |
+|  7 | midwest      |
+|  8 | mountain     |
+|  9 | west         |
++----+--------------+
++-----------+-----------+
+| team_name | team_rank |
++-----------+-----------+
+| syracuse  |         1 |
+| iona      |         2 |
+| cornell   |         3 |
++-----------+-----------+
++------------+-------------+-----------+
+| team_name  | region      | team_rank |
++------------+-------------+-----------+
+| georgetown | midatlantic |         1 |
+| penn       | midatlantic |         2 |
+| syracuse   | northeast   |         1 |
+| iona       | northeast   |         2 |
+| louisville | southeast   |         1 |
+| virginia   | southeast   |         2 |
++------------+-------------+-----------+
