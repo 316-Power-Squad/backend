@@ -1,6 +1,11 @@
 import request from 'request';
 import cheerio from 'cheerio';
-import db, { MODE_TEST } from './helpers/db';
+import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
+
+const mode =
+  process.argv[process.argv.length - 1] === 'prod'
+    ? MODE_PRODUCTION
+    : MODE_TEST;
 
 let urls = [];
 // ex. https://www.tfrrs.org/teams/xc/NC_college_m_Duke.html
@@ -431,7 +436,8 @@ const scrapeResult = async (meetUrl, meetName) => {
 const insertRegions = async region => {
   console.log(`Inserting Regions`);
   return new Promise((resolve, reject) => {
-    db.get().query(`INSERT INTO Region (name) values
+    db.get().query(
+      `INSERT INTO Region (name) values
       ('northeast'),
       ('midatlantic'),
       ('southeast'),
@@ -442,11 +448,12 @@ const insertRegions = async region => {
       ('mountain'),
       ('west')
     `,
-    [],
-    err => {
-      if (err) reject(err);
-      else resolve();
-    });
+      [],
+      err => {
+        if (err) reject(err);
+        else resolve();
+      }
+    );
   });
 };
 
@@ -543,7 +550,7 @@ const insertResults = async () => {
   });
 };
 
-db.connect(MODE_TEST, async () => {
+db.connect(mode, async () => {
   await insertResults();
   db.disconnect();
 });

@@ -1,4 +1,4 @@
-import db, { MODE_TEST } from './helpers/db';
+const VERBOSE = process.argv[process.argv.length - 1] === 'verbose';
 
 let regionals = {
   great_lakes: [
@@ -1285,7 +1285,7 @@ let printPoints = function(el, data) {
   data.messages.push('\n');
 };
 
-export default async () => {
+const execute = async () => {
   return new Promise((resolve, reject) => {
     let new_regionals = {};
     for (let rname in regionals) {
@@ -1347,15 +1347,32 @@ export default async () => {
     if (results == null || results.length == 0) {
       console.log('There was an error!!');
     } else {
-      console.log('\nTeams selected in alpha order:\n');
       let alpha_order_teams = results.teamsin.sort();
-      for (let i = 0; i < alpha_order_teams.length; i++) {
-        console.log(i + 1 + ' ' + alpha_order_teams[i]);
+      if (VERBOSE) {
+        console.log('\nTeams selected in alpha order:\n');
+        for (let i = 0; i < alpha_order_teams.length; i++) {
+          console.log(i + 1 + ' ' + alpha_order_teams[i]);
+        }
+        console.log('');
+        console.log('');
+        console.log(results.messages.join(''));
       }
-      console.log('');
-      console.log('');
-      console.log(results.messages.join(''));
     }
     resolve(results.teamsin);
   });
 };
+
+const runLocally = async () => {
+  try {
+    const res = await execute();
+    console.log(res);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+if (VERBOSE) {
+  runLocally();
+}
+
+export default execute;
