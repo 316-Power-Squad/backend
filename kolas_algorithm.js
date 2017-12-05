@@ -92,22 +92,6 @@ function Meet(name, teams, date="3000-01-01") {
     this.teams = teams;  // in order of place
 }
 
-let new_regionals = {};
-for (let rname in regionals) {
-  let teamlist = regionals[rname];
-  let m = new Meet(rname + " regional", teamlist);
-  new_regionals[rname] = m;
-}
-regionals = new_regionals;
-
-let new_meets = {};
-for (let mname in meets) {
-  let pr = meets[mname];
-  let m = new Meet(mname, pr[1], pr[0]);
-  new_meets[mname] = m;
-}
-meets = new_meets;
-
 function Data(teamsin_, curr_inds_, pushes_used_, points_, messages_, dont_push_){
   //might have to instantiate when initialized
   this.teamsin = teamsin_;
@@ -617,71 +601,98 @@ let printPoints = function(el, data){
   data.messages.push("\n");
 }
 
-// # print out the current status of everything
-// def printPoints(el,data):
+export default async () => {
+	return new Promise((resolve, reject) => {
+    let new_regionals = {};
+    for (let rname in regionals) {
+      let teamlist = regionals[rname];
+      let m = new Meet(rname + " regional", teamlist);
+      new_regionals[rname] = m;
+    }
+    regionals = new_regionals;
+
+    let new_meets = {};
+    for (let mname in meets) {
+      let pr = meets[mname];
+      let m = new Meet(mname, pr[1], pr[0]);
+      new_meets[mname] = m;
+    }
+    meets = new_meets;
+    // # print out the current status of everything
+    // def printPoints(el,data):
 
 
-//"do next step of selection"
-let doSelection = function(d){
-  if(d.teamsin.length == 31){
-    return d;
-  }
-  let el = getEligible(d);
-  // console.log(el);
-  printPoints(el,d);
-  return pickFrom(d,el);
-}
+    //"do next step of selection"
+    let doSelection = function(d){
+      if(d.teamsin.length == 31){
+        return d;
+      }
+      let el = getEligible(d);
+      // console.log(el);
+      printPoints(el,d);
+      return pickFrom(d,el);
+    }
 
 
-// # Start from a blank slate
-let curr_inds = {};
-let pushes_used = {};
-let points = {};
-let reg_keys = Object.keys(regionals).sort();
-for (let i = 0; i < reg_keys.length; i++){
-  let r = reg_keys[i];
-  curr_inds[r] = 0;
-  pushes_used[r] = false;
-  // console.log(reg_keys[r]);
-  for (let j = 0; j < regionals[r].teams.length; j++){
-    let t = regionals[r].teams[j];
-    points[t] = 0;
-  }
-}
+    // # Start from a blank slate
+    let curr_inds = {};
+    let pushes_used = {};
+    let points = {};
+    let reg_keys = Object.keys(regionals).sort();
+    for (let i = 0; i < reg_keys.length; i++){
+      let r = reg_keys[i];
+      curr_inds[r] = 0;
+      pushes_used[r] = false;
+      // console.log(reg_keys[r]);
+      for (let j = 0; j < regionals[r].teams.length; j++){
+        let t = regionals[r].teams[j];
+        points[t] = 0;
+      }
+    }
 
-for (let m in meets){
-  let l = meets[m];
-  for(let i = 0; i < l.teams.length; i++){
-    let t = l.teams[i];
-    points[t] = 0;
-  }
-}
+    for (let m in meets){
+      let l = meets[m];
+      for(let i = 0; i < l.teams.length; i++){
+        let t = l.teams[i];
+        points[t] = 0;
+      }
+    }
 
-let data = new Data([],curr_inds,pushes_used,points,[],[]);
- // selectTeam(data,"great_lakes",0);
-//
-// # Select automatically the top two in each region
-data.messages.push("Automatically selected:\n");
-for (let i = 0; i < reg_keys.length; i++){
-  let r = reg_keys[i];
-  // console.log("here is the data" + data.teamsin.length);
+    let data = new Data([],curr_inds,pushes_used,points,[],[]);
+     // selectTeam(data,"great_lakes",0);
+    //
+    // # Select automatically the top two in each region
+    data.messages.push("Automatically selected:\n");
+    for (let i = 0; i < reg_keys.length; i++){
+      let r = reg_keys[i];
+      // console.log("here is the data" + data.teamsin.length);
 
-  data = selectTeam(data,r,0,true);
-  data = selectTeam(data,r,1,true);
-}
+      data = selectTeam(data,r,0,true);
+      data = selectTeam(data,r,1,true);
+    }
 
-// # Select at-large teams
-let results = doSelection(data);
-if(results == null || results.length == 0){
-  console.log("There was an error!!");
-}
-else {
-  console.log("\nTeams selected in alpha order:\n");
-  let alpha_order_teams = results.teamsin.sort();
-  for (let i = 0; i < alpha_order_teams.length; i++){
-    console.log(i+1 + " " + alpha_order_teams[i]);
-  }
-  console.log("");
-  console.log("");
-  console.log(results.messages.join(""));
+    // # Select at-large teams
+    let results = doSelection(data);
+    if(results == null || results.length == 0){
+      console.log("There was an error!!");
+    }
+    else {
+      console.log("\nTeams selected in alpha order:\n");
+      let alpha_order_teams = results.teamsin.sort();
+      for (let i = 0; i < alpha_order_teams.length; i++){
+        console.log(i+1 + " " + alpha_order_teams[i]);
+      }
+      console.log("");
+      console.log("");
+      console.log(results.messages.join(""));
+    }
+		if (err) {
+			reject({
+				code: 'some_unique_code',
+				message: 'some error message'
+			});
+		}
+    
+		resolve(results.teamsin);
+	})
 }

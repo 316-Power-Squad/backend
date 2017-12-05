@@ -3,18 +3,33 @@ import db, { MODE_TEST } from './helpers/db';
 
 export const getTeam = (id) => {
   return new Promise((resolve, reject) => {
-    db.get().query(`SELECT * FROM Meet`, (err, rows) => {
+    db.get().query(`SELECT * FROM Meet where name=?`, [id], (err, rows) => {
     		if (err) {
           console.log(err);
-          reject({
-    				code: 'some_unique_code',
-    				message: 'some error message'
-    			});
+          reject(err);
     		}
-        resolve(rows);
+        else {
+          console.log(rows);
+          resolve(rows);
+        }
     });
-  }
-};
+  });
+}
+
+export const getMeet = (id) => {
+  return new Promise((resolve, reject) => {
+    db.get().query(`SELECT * FROM Meet where name=?`, [id], (err, rows) => {
+    		if (err) {
+          console.log(err);
+          reject(err);
+    		}
+        else {
+          console.log(rows);
+          resolve(rows);
+        }
+    });
+  });
+}
 
 // export default async () => {
 // 	return new Promise((resolve, reject) => {
