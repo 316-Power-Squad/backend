@@ -47,6 +47,7 @@ export const Schemas = [
   CREATE TABLE Meet (
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255) NOT NULL,
+    date varchar(255) NOT NULL,
     PRIMARY KEY (ID)
   )
 `,

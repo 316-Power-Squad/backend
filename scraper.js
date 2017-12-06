@@ -274,12 +274,52 @@ const sleep = async () => {
   console.log('Two second later');
 };
 
+const parseMonth = function(month) {
+  if (month == 'Jan') {
+    return '1';
+  }
+  if (month == 'Feb') {
+    return '2';
+  }
+  if (month == 'Mar') {
+    return '3';
+  }
+  if (month == 'Apr') {
+    return '4';
+  }
+  if (month == 'May') {
+    return '5';
+  }
+  if (month == 'Jun') {
+    return '6';
+  }
+  if (month == 'Jul') {
+    return '7';
+  }
+  if (month == 'Aug') {
+    return '8';
+  }
+  if (month == 'Sep') {
+    return '9';
+  }
+  if (month == 'Oct') {
+    return '10';
+  }
+  if (month == 'Nov') {
+    return '11';
+  }
+  if (month == 'Dec') {
+    return '12';
+  }
+};
+
 const formatDate = function(date) {
-  if (date == '#') {
+  if (date == '#' || date.split(' ').length != 3 || date.includes('-')) {
     return '01/01/2000';
   }
-  let parts = date.split('/');
-  parts[2] = '20'.concat(parts[2]).replace('\n', '');
+  let parts = date.split(' ');
+  parts[0] = parseMonth(parts[0]);
+  parts[1] = parts[1].replace(',', '');
   let result = parts.join('/');
   return result;
 };
@@ -287,55 +327,51 @@ const formatDate = function(date) {
 const fetchMeets = async url => {
   return new Promise((resolve, reject) => {
     let meets = new Map();
+    let meetDates = new Map();
+    let finalRegion = '';
     request(url, async (err, resp, body) => {
       let splitUrl = url.split('_');
       let team = splitUrl.splice(3, splitUrl.length).join('_');
       if (!err && resp.statusCode == 200 && team) {
         let $ = cheerio.load(body);
-        $('a', '.headleague').each(async () => {
+        $('a', 'span.panel-heading-normal-text').each(function() {
           let splitRegion = $(this)
             .text()
             .split(' ');
           let region = splitRegion.splice(1, splitRegion.length).join(' ');
           if (splitRegion.includes('DI')) {
-            try {
-              await insertTeam(team, 'mens');
-              await insertTeam(team, 'womens');
-            } catch (err) {
-              console.log(`Error inserting team ${team}`);
-            }
+            finalRegion = region.toLowerCase();
           }
         });
-        $('tr', '.data, .scroll').each(function() {
-          if (
-            !$(this)
-              .find('.date')
-              .text()
-          ) {
-          } else {
-            let date = parseDate(
-              formatDate(
-                $(this)
-                  .find('.date')
-                  .text()
-              )
-            );
-            if (date.getTime() >= earliestDate.getTime()) {
-              const meetLink = $(this)
-                .find('a')
-                .attr('href')
-                .replace('//', '');
-              const meetName = $(this)
-                .find('a')
-                .text();
-              if (meetLink.includes('www')) {
-                meets.set(meetName, 'https://'.concat(meetLink));
-              }
+        $('tr').each(function() {
+          let row = $(this)
+            .text()
+            .split('\n');
+          let date = parseDate(formatDate(row[1]));
+          if (!date) {
+          } else if (date.getTime() >= earliestDate.getTime()) {
+            let meetName = row[3];
+            let meetUrl = $(this)
+              .find('a')
+              .attr('href')
+              .replace('//', '');
+            if (meetUrl.includes('www')) {
+              meets.set(meetName, 'https://'.concat(meetUrl));
+              meetDates.set(
+                meetName,
+                formatDate(row[1])
+                  .split('/')
+                  .join('-')
+              );
             }
           }
         });
       }
-      resolve(meets);
+      resolve({
+        dates: meetDates,
+        meets: meets,
+        region: finalRegion,
+      });
     });
   });
 };
@@ -368,22 +404,27 @@ const getResults = async () => {
   const teams = await getSchoolNames();
   let teamNames = populateTeams(teams);
   let meets = new Map();
+  let meetDates = new Map();
+  let region = '';
   for (var i = 0; i < teams.length; i++) {
     if (teams[i][0] === 'School') continue;
-    try {
-      await insertTeam(teams[i][0], 'mens');
-      await insertTeam(teams[i][0], 'womens');
-    } catch (err) {
-      console.log(`Error inserting team ${teams[i][0]}`);
-    }
     let url = teamBaseUrl
       .concat(teams[i][1])
       .concat('_college_m_')
       .concat(teams[i][0]);
     let newMeets = await fetchMeets(url);
-    meets = new Map([...meets, ...newMeets]);
+    meets = new Map([...meets, ...newMeets.meets]);
+    meetDates = new Map([...meetDates, ...newMeets.dates]);
+    region = newMeets.region;
+    try {
+      await insertTeam(teams[i][0], 'mens', region);
+      await insertTeam(teams[i][0], 'womens', region);
+    } catch (err) {
+      console.log(err);
+      console.log(`Error inserting team ${teams[i][0]}`);
+    }
   }
-  return meets;
+  return [meets, meetDates];
 };
 
 const scrapeResult = async (meetUrl, meetName) => {
@@ -401,21 +442,24 @@ const scrapeResult = async (meetUrl, meetName) => {
         $('tr').each(function() {
           const data = $(this);
           let row = data.text().split('\n');
+          if (row.length == 40) {
+            count++;
+          }
           let link = data.find('a').attr('href');
           if (count <= 11000) {
             try {
               let rank = parseInt(row[2]);
-              let school = row[4]
+              let school = row[5]
+                .trim()
                 .split(' ')
                 .join('_')
                 .split('.')
                 .join('');
               count++;
-
               if (teamNames.includes(school)) {
-                if (link.includes('_f_')) {
+                if (link.toLowerCase().includes('_f_')) {
                   results.get(meetName)[1].set(school, rank);
-                } else if (link.includes('_m_')) {
+                } else if (link.toLowerCase().includes('_m_')) {
                   results.get(meetName)[0].set(school, rank);
                 }
               }
@@ -431,48 +475,62 @@ const scrapeResult = async (meetUrl, meetName) => {
 const insertRegions = async region => {
   console.log(`Inserting Regions`);
   return new Promise((resolve, reject) => {
-    db.get().query(`INSERT INTO Region (name) values
+    db.get().query(
+      `INSERT INTO Region (name) values
       ('northeast'),
-      ('midatlantic'),
+      ('mid-atlantic'),
       ('southeast'),
       ('south'),
-      ('southcentral'),
-      ('greatlakes'),
+      ('south central'),
+      ('great lakes'),
       ('midwest'),
       ('mountain'),
-      ('west')
+      ('west'),
+      ('N/A')
     `,
-    [],
-    err => {
-      if (err) reject(err);
-      else resolve();
-    });
+      [],
+      err => {
+        if (err) reject(err);
+        else resolve();
+      }
+    );
   });
 };
 
-const insertMeet = async name => {
+const insertMeet = async (name, date) => {
   console.log(`Inserting a meet ${name}`);
-  return new Promise((resolve, reject) => {
-    db.get().query(`INSERT INTO Meet (name) values (?)`, [name], err => {
-      if (err) reject(err);
-      else resolve();
-    });
-  });
-};
-
-const insertTeam = async (name, gender) => {
-  console.log(`Inserting a team ${name}`);
   return new Promise((resolve, reject) => {
     db
       .get()
       .query(
-        `INSERT INTO Team (name, gender) values (?, ?)`,
-        [name, gender],
+        `INSERT INTO Meet (name, date) values (?, ?)`,
+        [name, date],
         err => {
           if (err) reject(err);
           else resolve();
         }
       );
+  });
+};
+
+const insertTeam = async (name, gender, region) => {
+  const lastIndex = region.lastIndexOf(' ');
+  let actualRegion = region.substring(0, lastIndex);
+  if (!actualRegion) {
+    actualRegion = "N/A"
+  }
+  console.log(`Inserting a team ${name} with region ${region}`);
+  return new Promise((resolve, reject) => {
+    db.get().query(
+      `INSERT INTO Team (name, gender, region_id) values (?, ?, (
+          SELECT id from Region WHERE Region.name=?
+        ))`,
+      [name, gender, actualRegion],
+      err => {
+        if (err) reject(err);
+        else resolve();
+      }
+    );
   });
 };
 
@@ -496,16 +554,19 @@ const insertParticipates = async (meet, team, gender, place) => {
 const mapResults = async () => {
   return new Promise(async (resolve, reject) => {
     let results = new Map();
-    const meets = await getResults();
+    const meetData = await getResults();
+    const meets = meetData[0];
+    const meetDates = meetData[1];
     for (let [meetName, meetUrl] of meets) {
       try {
-        await insertMeet(meetName);
+        await insertMeet(meetName, meetDates.get(meetName));
       } catch (err) {
         console.log('Error inserting meet', err);
       }
       console.log('Scraping ', meetUrl);
       let newResult = await scrapeResult(meetUrl, meetName);
       results = new Map([...results, ...newResult]);
+      console.log(results);
     }
     resolve(results);
   });
@@ -513,9 +574,9 @@ const mapResults = async () => {
 
 const insertResults = async () => {
   return new Promise(async (resolve, reject) => {
-    let results = await mapResults();
-    console.log(results);
     await insertRegions();
+    let results = await mapResults();
+    //console.log(results);
     for (let meet of results.keys()) {
       let r = results.get(meet);
       console.log(meet);
