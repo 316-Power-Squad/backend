@@ -477,15 +477,15 @@ const insertRegions = async region => {
   return new Promise((resolve, reject) => {
     db.get().query(
       `INSERT INTO Region (name) values
-      ('northeast'),
-      ('midatlantic'),
-      ('southeast'),
-      ('south'),
-      ('southcentral'),
-      ('greatlakes'),
-      ('midwest'),
-      ('mountain'),
-      ('west')
+      ('northeast region'),
+      ('mid-atlantic region'),
+      ('southeast region'),
+      ('south region'),
+      ('south central region'),
+      ('great lakes region'),
+      ('midwest region'),
+      ('mountain region'),
+      ('west region')
     `,
       [],
       err => {
