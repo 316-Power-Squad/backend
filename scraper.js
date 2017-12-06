@@ -206,6 +206,10 @@ const getTeamName = function(school) {
     return 'East_Tenn_St';
   } if (school.includes('Providence College')) {
     return 'Providence';
+  } if (school.includes('Iona College')) {
+    return 'Iona';
+  } if (school.includes('Army')) {
+    return ('Army_West_Point');
   }
   for (var i = 0; i < splitSchool.length; i++) {
     if (splitSchool[i].includes('!')) {
