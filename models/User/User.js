@@ -6,6 +6,7 @@ import emailValidator from 'email-validator';
 import db from '../../helpers/db';
 import {
   hashingError,
+  noUserError,
   passwordValidationError,
   emailValidationError,
   invalidPasswordError,
@@ -45,7 +46,9 @@ export const newUser = (name, email, password, done) => {
 export const validateUser = (email, password, done) => {
   db.get().query(`SELECT * FROM User WHERE email=?`, [email], (err, rows) => {
     if (err) done(false, sqlError);
-    else {
+    else if (rows.length === 0) {
+      done({}, noUserError);
+    } else {
       bcrypt.compare(password, rows[0].hash, (err, res) => {
         if (res) {
           // We have a valid user...pass them a signed JWT token

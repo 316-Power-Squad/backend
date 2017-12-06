@@ -1,5 +1,5 @@
 /**
- * In this file we define the schema for the database. We also provide a function for 
+ * In this file we define the schema for the database. We also provide a function for
  * intitializing the schema. Need to worry about updating the schema as well (migrations)
  */
 import async from 'async';
@@ -29,18 +29,11 @@ export const Schemas = [
   CREATE TABLE Team (
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255) NOT NULL,
+    region_id int NOT NULL REFERENCES Region(id),
     gender ENUM('mens', 'womens') NOT NULL,
     region varchar(255) NOT NULL,
     PRIMARY KEY (ID),
     UNIQUE(name, gender)
-  )
-`,
-  `
-  CREATE TABLE TeamInRegion (
-    team_id int NOT NULL REFERENCES Team(id),
-    region_id int NOT NULL REFERENCES Region(id),
-    team_rank int NOT NULL,
-    PRIMARY KEY (team_id, region_id)
   )
 `,
   `
@@ -69,70 +62,55 @@ export const Schemas = [
 `,
 ];
 
-export const Views = [
-  `
-  CREATE VIEW TeamWithRegion AS (
-    SELECT Team.name AS team_name, Team.gender, TeamInRegion.team_rank, Region.name AS region 
-    FROM Team, TeamInRegion, Region 
-    WHERE Team.id = TeamInRegion.team_id AND TeamInRegion.region_id = Region.id
-  )
-`,
-];
+export const Views = [];
 
-// Create a separate connection for creating the database
-const initialConnection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: process.env.MYSQL_PASSWORD,
-});
+const asyncQuery = (conn, query) => {
+  return new Promise((resolve, reject) => {
+    conn.query(query, (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+};
+
+const executeQueries = async (conn, queryArray) => {
+  return new Promise(async (resolve, reject) => {
+    for (let query of queryArray) {
+      try {
+        await asyncQuery(conn, query);
+      } catch (err) {
+        reject(err);
+      }
+    }
+    resolve();
+  });
+};
 
 // This is what callback hell looks like - should use async / await
-export const seed = (mode, done) => {
+export const seed = mode => {
+  // Create a separate connection for creating the database
+  const initialConnection = mysql.createConnection({
+    host: mode === MODE_PRODUCTION ? process.env.PRODUCTION_HOST : 'localhost',
+    user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
+    password: process.env.MYSQL_PASSWORD,
+  });
+
   const seedConnection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
+    host: mode === MODE_PRODUCTION ? process.env.PRODUCTION_HOST : 'localhost',
+    user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
     database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB,
   });
 
-  const reseed = done => {
-    async.each(
-      Schemas,
-      (schema, cb) => {
-        seedConnection.query(schema, cb);
-      },
-      done
-    );
-  };
-
-  const createViews = done => {
-    async.each(
-      Views,
-      (viewQuery, cb) => {
-        seedConnection.query(viewQuery, cb);
-      },
-      () => {
-        seedConnection.end();
-        done();
-      }
-    );
-  };
-
-  db.connect(mode, err => {
-    if (err) done(err);
-    else {
-      async.each(
-        createDatabaseQueries,
-        (databaseQuery, cb) => {
-          initialConnection.query(databaseQuery, cb);
-        },
-        () => {
-          initialConnection.end();
-          reseed(() => {
-            createViews(done);
-          });
-        }
-      );
+  return new Promise(async (resolve, reject) => {
+    try {
+      await executeQueries(initialConnection, createDatabaseQueries);
+      initialConnection.end();
+      await executeQueries(seedConnection, Schemas);
+      await executeQueries(seedConnection, Views);
+      seedConnection.end();
+    } catch (err) {
+      console.log(err);
     }
   });
 };

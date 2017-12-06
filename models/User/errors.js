@@ -5,6 +5,11 @@ export const hashingError = {
   message: 'Could not process the given password',
 };
 
+export const noUserError = {
+  code: `${prefix}_no_user`,
+  message: 'Could not find user',
+};
+
 export const emailValidationError = {
   code: `${prefix}_email_validation`,
   message: 'Invalid email address',

@@ -1,27 +1,27 @@
-import request from "request";
-import cheerio from "cheerio";
-import db, { MODE_TEST } from "./helpers/db";
+import request from 'request';
+import cheerio from 'cheerio';
+import db, { MODE_TEST } from './helpers/db';
 
 let urls = [];
 // ex. https://www.tfrrs.org/teams/xc/NC_college_m_Duke.html
-let teamBaseUrl = "https://www.tfrrs.org/teams/xc/";
+let teamBaseUrl = 'https://www.tfrrs.org/teams/xc/';
 
 //ex. https://www.tfrrs.org/results/xc/11563.html
-let resultBaseUrl = "https://www.tfrrs.org/results/xc/";
+let resultBaseUrl = 'https://www.tfrrs.org/results/xc/';
 
 const notTitle = function(s) {
   if (
-    s == "Primary Conference" ||
-    s == "Making Transition" ||
-    s == "Full Membership" ||
-    s == "Future Conference"
+    s == 'Primary Conference' ||
+    s == 'Making Transition' ||
+    s == 'Full Membership' ||
+    s == 'Future Conference'
   ) {
     return false;
   }
   if (
-    s == "Savannah State University" ||
-    s == "California Baptist University" ||
-    s == "North Alabama !University of North Alabama"
+    s == 'Savannah State University' ||
+    s == 'California Baptist University' ||
+    s == 'North Alabama !University of North Alabama'
   ) {
     return false;
   }
@@ -30,192 +30,192 @@ const notTitle = function(s) {
 
 const getAbbrev = function(state) {
   const states = new Map([
-    ["Arizona", "AZ"],
-    ["Alabama", "AL"],
-    ["Alaska", "AK"],
-    ["Arizona", "AZ"],
-    ["Arkansas", "AR"],
-    ["California", "CA"],
-    ["Colorado", "CO"],
-    ["Connecticut", "CT"],
-    ["Delaware", "DE"],
-    ["Florida", "FL"],
-    ["Georgia", "GA"],
-    ["Hawaii", "HI"],
-    ["Idaho", "ID"],
-    ["Illinois", "IL"],
-    ["Indiana", "IN"],
-    ["Iowa", "IA"],
-    ["Kansas", "KS"],
-    ["Kentucky", "KY"],
-    ["Kentucky", "KY"],
-    ["Louisiana", "LA"],
-    ["Maine", "ME"],
-    ["Maryland", "MD"],
-    ["Massachusetts", "MA"],
-    ["Michigan", "MI"],
-    ["Minnesota", "MN"],
-    ["Mississippi", "MS"],
-    ["Missouri", "MO"],
-    ["Montana", "MT"],
-    ["Nebraska", "NE"],
-    ["Nevada", "NV"],
-    ["New Hampshire", "NH"],
-    ["New Jersey", "NJ"],
-    ["New Mexico", "NM"],
-    ["New York", "NY"],
-    ["North Carolina", "NC"],
-    ["North Dakota", "ND"],
-    ["Ohio", "OH"],
-    ["Oklahoma", "OK"],
-    ["Oregon", "OR"],
-    ["Pennsylvania", "PA"],
-    ["Rhode Island", "RI"],
-    ["South Carolina", "SC"],
-    ["South Dakota", "SD"],
-    ["Tennessee", "TN"],
-    ["Texas", "TX"],
-    ["Utah", "UT"],
-    ["Vermont", "VT"],
-    ["Virginia", "VA"],
-    ["Washington", "WA"],
-    ["District of Columbia", "DC"],
-    ["West Virginia", "WV"],
-    ["Wisconsin", "WI"],
-    ["Wyoming", "WY"]
+    ['Arizona', 'AZ'],
+    ['Alabama', 'AL'],
+    ['Alaska', 'AK'],
+    ['Arizona', 'AZ'],
+    ['Arkansas', 'AR'],
+    ['California', 'CA'],
+    ['Colorado', 'CO'],
+    ['Connecticut', 'CT'],
+    ['Delaware', 'DE'],
+    ['Florida', 'FL'],
+    ['Georgia', 'GA'],
+    ['Hawaii', 'HI'],
+    ['Idaho', 'ID'],
+    ['Illinois', 'IL'],
+    ['Indiana', 'IN'],
+    ['Iowa', 'IA'],
+    ['Kansas', 'KS'],
+    ['Kentucky', 'KY'],
+    ['Kentucky', 'KY'],
+    ['Louisiana', 'LA'],
+    ['Maine', 'ME'],
+    ['Maryland', 'MD'],
+    ['Massachusetts', 'MA'],
+    ['Michigan', 'MI'],
+    ['Minnesota', 'MN'],
+    ['Mississippi', 'MS'],
+    ['Missouri', 'MO'],
+    ['Montana', 'MT'],
+    ['Nebraska', 'NE'],
+    ['Nevada', 'NV'],
+    ['New Hampshire', 'NH'],
+    ['New Jersey', 'NJ'],
+    ['New Mexico', 'NM'],
+    ['New York', 'NY'],
+    ['North Carolina', 'NC'],
+    ['North Dakota', 'ND'],
+    ['Ohio', 'OH'],
+    ['Oklahoma', 'OK'],
+    ['Oregon', 'OR'],
+    ['Pennsylvania', 'PA'],
+    ['Rhode Island', 'RI'],
+    ['South Carolina', 'SC'],
+    ['South Dakota', 'SD'],
+    ['Tennessee', 'TN'],
+    ['Texas', 'TX'],
+    ['Utah', 'UT'],
+    ['Vermont', 'VT'],
+    ['Virginia', 'VA'],
+    ['Washington', 'WA'],
+    ['District of Columbia', 'DC'],
+    ['West Virginia', 'WV'],
+    ['Wisconsin', 'WI'],
+    ['Wyoming', 'WY'],
   ]);
   let answer = states.get(state);
-  return answer ? answer : "";
+  return answer ? answer : '';
 };
 
 const getCalifornia = function(school) {
-  let splitSchool = school.split(" ");
+  let splitSchool = school.split(' ');
   let usableWords = [];
   for (var i = 0; i < splitSchool.length; i++) {
-    if (splitSchool[i].includes("!")) {
+    if (splitSchool[i].includes('!')) {
       break;
     } else {
       usableWords.push(splitSchool[i]);
     }
   }
-  if (school.includes("Los Angeles")) {
-    return "UCLA";
+  if (school.includes('Los Angeles')) {
+    return 'UCLA';
   }
-  if (school.includes("Berkeley")) {
-    return "California";
+  if (school.includes('Berkeley')) {
+    return 'California';
   }
-  if (school.includes("University of California")) {
-    usableWords[0] = "UC";
-    return usableWords.join("_");
+  if (school.includes('University of California')) {
+    usableWords[0] = 'UC';
+    return usableWords.join('_');
   }
-  if (school.includes("California State University")) {
+  if (school.includes('California State University')) {
     if (
-      splitSchool[splitSchool.length - 1] == "Fresno" ||
-      splitSchool[splitSchool.length - 1] == "Sacramento" ||
-      splitSchool[splitSchool.length - 1] == "Long Beach"
+      splitSchool[splitSchool.length - 1] == 'Fresno' ||
+      splitSchool[splitSchool.length - 1] == 'Sacramento' ||
+      splitSchool[splitSchool.length - 1] == 'Long Beach'
     ) {
-      return splitSchool[splitSchool.length - 1].concat("_State");
+      return splitSchool[splitSchool.length - 1].concat('_State');
     } else {
-      return "Cal_St_".concat(splitSchool[splitSchool.length - 1]);
+      return 'Cal_St_'.concat(splitSchool[splitSchool.length - 1]);
     }
   }
 };
 
 const getNC = function(school) {
-  let splitSchool = school.split(" ");
-  if (school.includes("Chapel Hill")) {
-    return "North Carolina";
+  let splitSchool = school.split(' ');
+  if (school.includes('Chapel Hill')) {
+    return 'North Carolina';
   } else {
-    return "UNC_".concat(splitSchool[2]);
+    return 'UNC_'.concat(splitSchool[2]);
   }
 };
 
 const getWisco = function(school) {
-  let splitSchool = school.split(" ");
-  if (school.includes("Madison")) {
-    return "Wisconsin";
+  let splitSchool = school.split(' ');
+  if (school.includes('Madison')) {
+    return 'Wisconsin';
   } else {
-    return "Wis_".concat(splitSchool[1]);
+    return 'Wis_'.concat(splitSchool[1]);
   }
 };
 
 const getTexas = function(school) {
-  let splitSchool = school.split(" ");
+  let splitSchool = school.split(' ');
   let usableWords = [];
   for (var i = 0; i < splitSchool.length; i++) {
-    if (splitSchool[i].includes("!")) {
+    if (splitSchool[i].includes('!')) {
       break;
     } else {
       usableWords.push(splitSchool[i]);
     }
   }
-  if (school.includes("Austin")) {
-    return "Texas";
-  } else if (school.includes("El Paso")) {
-    return "UTEP";
+  if (school.includes('Austin')) {
+    return 'Texas';
+  } else if (school.includes('El Paso')) {
+    return 'UTEP';
   } else {
-    return "UT_".concat(
-      usableWords.splice(1, usableWords.length - 1).join("_")
+    return 'UT_'.concat(
+      usableWords.splice(1, usableWords.length - 1).join('_')
     );
   }
 };
 
 const getTeamName = function(school) {
   let usableWords = [];
-  let splitSchool = school.split(" ");
-  if (school == "Boston University") {
-    return "Boston_U";
+  let splitSchool = school.split(' ');
+  if (school == 'Boston University') {
+    return 'Boston_U';
   }
-  if (school.includes("Brigham Young")) {
-    return "BYU";
+  if (school.includes('Brigham Young')) {
+    return 'BYU';
   }
   if (
-    school.includes("California State University") ||
-    school.includes("University of California")
+    school.includes('California State University') ||
+    school.includes('University of California')
   ) {
     return getCalifornia(school);
   }
-  if (school.includes("California Polytechnic")) {
-    return "Cal_Poly";
+  if (school.includes('California Polytechnic')) {
+    return 'Cal_Poly';
   }
-  if (school.includes("University of North Carolina")) {
+  if (school.includes('University of North Carolina')) {
     return getNC(school);
   }
-  if (school.includes("University of Wisconsin")) {
+  if (school.includes('University of Wisconsin')) {
     return getWisco(school);
   }
-  if (school.includes("University of Texas")) {
+  if (school.includes('University of Texas')) {
     return getTexas(school);
   }
-  if (splitSchool[0] == "Pennsylvania") {
-    splitSchool[0] = "Penn";
+  if (splitSchool[0] == 'Pennsylvania') {
+    splitSchool[0] = 'Penn';
   }
-  if (school == "University of Mississippi") {
-    return "Ole_Miss";
+  if (school == 'University of Mississippi') {
+    return 'Ole_Miss';
   }
-  if (school == "Mississippi State University") {
-    return "Miss_State";
+  if (school == 'Mississippi State University') {
+    return 'Miss_State';
   }
-  if (school == "Colorado Boulder !University of Colorado Boulder") {
-    return "Colorado";
+  if (school == 'Colorado Boulder !University of Colorado Boulder') {
+    return 'Colorado';
   }
-  if (school.includes("Virginia Tech")) {
-    return "Virginia_Tech";
+  if (school.includes('Virginia Tech')) {
+    return 'Virginia_Tech';
   }
-  if (school.includes("East Tennessee State University")) {
-    return "East_Tenn_St";
+  if (school.includes('East Tennessee State University')) {
+    return 'East_Tenn_St';
   }
   for (var i = 0; i < splitSchool.length; i++) {
-    if (splitSchool[i].includes("!")) {
-      return usableWords.join("_");
+    if (splitSchool[i].includes('!')) {
+      return usableWords.join('_');
     } else {
       usableWords.push(splitSchool[i]);
     }
   }
-  if (usableWords[usableWords.length - 1] == "University") {
-    usableWords[usableWords.length - 1] = "";
+  if (usableWords[usableWords.length - 1] == 'University') {
+    usableWords[usableWords.length - 1] = '';
     usableWords = usableWords.splice(0, usableWords.length - 1);
-    return usableWords.join("_");
+    return usableWords.join('_');
   }
   return school;
 };
@@ -225,26 +225,26 @@ const getSchoolNames = async () => {
     let names = [];
     let count = 0;
     request(
-      "https://en.wikipedia.org/wiki/List_of_NCAA_Division_I_institutions",
+      'https://en.wikipedia.org/wiki/List_of_NCAA_Division_I_institutions',
       function(err, resp, body) {
         if (!err && resp.statusCode == 200) {
           var $ = cheerio.load(body);
           var count = 0;
-          $("tr", ".sortable").each(function() {
+          $('tr', '.sortable').each(function() {
             const row = $(this)
               .text()
-              .split("\n");
+              .split('\n');
             const data = [
               getTeamName(row[1])
-                .split(" ")
-                .join("_"),
-              getAbbrev(row[4])
+                .split(' ')
+                .join('_'),
+              getAbbrev(row[4]),
             ];
             names.push(data);
-            let splitData = data[0].split("_");
-            if (splitData[splitData.length - 1] == "State") {
-              splitData[splitData.length - 1] = "St";
-              names.push([splitData.join("_"), getAbbrev(row[4])]);
+            let splitData = data[0].split('_');
+            if (splitData[splitData.length - 1] == 'State') {
+              splitData[splitData.length - 1] = 'St';
+              names.push([splitData.join('_'), getAbbrev(row[4])]);
             }
             count++;
           });
@@ -262,65 +262,65 @@ const parseDate = function(date) {
   return new Date(date);
 };
 
-const earliestDate = parseDate("09/08/2017");
+const earliestDate = parseDate('09/08/2017');
 
 const delay = function(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
 
 const sleep = async () => {
-  console.log("Taking a break...");
+  console.log('Taking a break...');
   await delay((Math.random() * 5 + 1) * 1000);
-  console.log("Two second later");
+  console.log('Two second later');
 };
 
 const parseMonth = function(month) {
-  if (month == "Jan") {
-    return "1";
+  if (month == 'Jan') {
+    return '1';
   }
-  if (month == "Feb") {
-    return "2";
+  if (month == 'Feb') {
+    return '2';
   }
-  if (month == "Mar") {
-    return "3";
+  if (month == 'Mar') {
+    return '3';
   }
-  if (month == "Apr") {
-    return "4";
+  if (month == 'Apr') {
+    return '4';
   }
-  if (month == "May") {
-    return "5";
+  if (month == 'May') {
+    return '5';
   }
-  if (month == "Jun") {
-    return "6";
+  if (month == 'Jun') {
+    return '6';
   }
-  if (month == "Jul") {
-    return "7";
+  if (month == 'Jul') {
+    return '7';
   }
-  if (month == "Aug") {
-    return "8";
+  if (month == 'Aug') {
+    return '8';
   }
-  if (month == "Sep") {
-    return "9";
+  if (month == 'Sep') {
+    return '9';
   }
-  if (month == "Oct") {
-    return "10";
+  if (month == 'Oct') {
+    return '10';
   }
-  if (month == "Nov") {
-    return "11";
+  if (month == 'Nov') {
+    return '11';
   }
-  if (month == "Dec") {
-    return "12";
+  if (month == 'Dec') {
+    return '12';
   }
 };
 
 const formatDate = function(date) {
-  if (date == "#" || date.split(" ").length != 3 || date.includes("-")) {
-    return "01/01/2000";
+  if (date == '#' || date.split(' ').length != 3 || date.includes('-')) {
+    return '01/01/2000';
   }
-  let parts = date.split(" ");
+  let parts = date.split(' ');
   parts[0] = parseMonth(parts[0]);
-  parts[1] = parts[1].replace(",", "");
-  let result = parts.join("/");
+  parts[1] = parts[1].replace(',', '');
+  let result = parts.join('/');
   return result;
 };
 
@@ -328,40 +328,40 @@ const fetchMeets = async url => {
   return new Promise((resolve, reject) => {
     let meets = new Map();
     let meetDates = new Map();
-    let finalRegion = "";
+    let finalRegion = '';
     request(url, async (err, resp, body) => {
-      let splitUrl = url.split("_");
-      let team = splitUrl.splice(3, splitUrl.length).join("_");
+      let splitUrl = url.split('_');
+      let team = splitUrl.splice(3, splitUrl.length).join('_');
       if (!err && resp.statusCode == 200 && team) {
         let $ = cheerio.load(body);
-        $("a", "span.panel-heading-normal-text").each(function() {
+        $('a', 'span.panel-heading-normal-text').each(function() {
           let splitRegion = $(this)
             .text()
-            .split(" ");
-          let region = splitRegion.splice(1, splitRegion.length).join(" ");
-          if (splitRegion.includes("DI")) {
+            .split(' ');
+          let region = splitRegion.splice(1, splitRegion.length).join(' ');
+          if (splitRegion.includes('DI')) {
             finalRegion = region.toLowerCase();
           }
         });
-        $("tr").each(function() {
+        $('tr').each(function() {
           let row = $(this)
             .text()
-            .split("\n");
+            .split('\n');
           let date = parseDate(formatDate(row[1]));
           if (!date) {
           } else if (date.getTime() >= earliestDate.getTime()) {
             let meetName = row[3];
             let meetUrl = $(this)
-              .find("a")
-              .attr("href")
-              .replace("//", "");
-            if (meetUrl.includes("www")) {
-              meets.set(meetName, "https://".concat(meetUrl));
+              .find('a')
+              .attr('href')
+              .replace('//', '');
+            if (meetUrl.includes('www')) {
+              meets.set(meetName, 'https://'.concat(meetUrl));
               meetDates.set(
                 meetName,
                 formatDate(row[1])
-                  .split("/")
-                  .join("-")
+                  .split('/')
+                  .join('-')
               );
             }
           }
@@ -370,7 +370,7 @@ const fetchMeets = async url => {
       resolve({
         dates: meetDates,
         meets: meets,
-        region: finalRegion
+        region: finalRegion,
       });
     });
   });
@@ -386,7 +386,7 @@ const joinLists = function(list1, list2) {
 };
 
 const convertTime = function(time) {
-  let splitTime = time.split(":");
+  let splitTime = time.split(':');
   let minutes = parseInt(splitTime[0]) * 60;
   let seconds = parseInt(splitTime[1]);
   return minutes + seconds;
@@ -405,20 +405,20 @@ const getResults = async () => {
   let teamNames = populateTeams(teams);
   let meets = new Map();
   let meetDates = new Map();
-  let region = "";
+  let region = '';
   for (var i = 0; i < teams.length; i++) {
-    if (teams[i][0] === "School") continue;
+    if (teams[i][0] === 'School') continue;
     let url = teamBaseUrl
       .concat(teams[i][1])
-      .concat("_college_m_")
+      .concat('_college_m_')
       .concat(teams[i][0]);
     let newMeets = await fetchMeets(url);
     meets = new Map([...meets, ...newMeets.meets]);
     meetDates = new Map([...meetDates, ...newMeets.dates]);
     region = newMeets.region;
     try {
-      await insertTeam(teams[i][0], "mens", region);
-      await insertTeam(teams[i][0], "womens", region);
+      await insertTeam(teams[i][0], 'mens', region);
+      await insertTeam(teams[i][0], 'womens', region);
     } catch (err) {
       console.log(`Error inserting team ${teams[i][0]}`);
     }
@@ -438,27 +438,27 @@ const scrapeResult = async (meetUrl, meetName) => {
         let mens = new Map();
         let womens = new Map();
         results.set(meetName, [mens, womens]);
-        $("tr").each(function() {
+        $('tr').each(function() {
           const data = $(this);
-          let row = data.text().split("\n");
+          let row = data.text().split('\n');
           if (row.length == 40) {
             count++;
           }
-          let link = data.find("a").attr("href");
+          let link = data.find('a').attr('href');
           if (count <= 11000) {
             try {
               let rank = parseInt(row[2]);
               let school = row[5]
                 .trim()
-                .split(" ")
-                .join("_")
-                .split(".")
-                .join("");
+                .split(' ')
+                .join('_')
+                .split('.')
+                .join('');
               count++;
               if (teamNames.includes(school)) {
-                if (link.toLowerCase().includes("_f_")) {
+                if (link.toLowerCase().includes('_f_')) {
                   results.get(meetName)[1].set(school, rank);
-                } else if (link.toLowerCase().includes("_m_")) {
+                } else if (link.toLowerCase().includes('_m_')) {
                   results.get(meetName)[0].set(school, rank);
                 }
               }
@@ -474,7 +474,8 @@ const scrapeResult = async (meetUrl, meetName) => {
 const insertRegions = async region => {
   console.log(`Inserting Regions`);
   return new Promise((resolve, reject) => {
-    db.get().query(`INSERT INTO Region (name) values
+    db.get().query(
+      `INSERT INTO Region (name) values
       ('northeast'),
       ('midatlantic'),
       ('southeast'),
@@ -485,11 +486,12 @@ const insertRegions = async region => {
       ('mountain'),
       ('west')
     `,
-    [],
-    err => {
-      if (err) reject(err);
-      else resolve();
-    });
+      [],
+      err => {
+        if (err) reject(err);
+        else resolve();
+      }
+    );
   });
 };
 
@@ -552,9 +554,9 @@ const mapResults = async () => {
       try {
         await insertMeet(meetName, meetDates.get(meetName));
       } catch (err) {
-        console.log("Error inserting meet", err);
+        console.log('Error inserting meet', err);
       }
-      console.log("Scraping ", meetUrl);
+      console.log('Scraping ', meetUrl);
       let newResult = await scrapeResult(meetUrl, meetName);
       results = new Map([...results, ...newResult]);
       console.log(results);
@@ -573,7 +575,7 @@ const insertResults = async () => {
       console.log(meet);
       for (let mensTeam of r[0].keys()) {
         try {
-          await insertParticipates(meet, mensTeam, "mens", r[0].get(mensTeam));
+          await insertParticipates(meet, mensTeam, 'mens', r[0].get(mensTeam));
         } catch (err) {
           console.log(`Error inserting men's participation`, err);
         }
@@ -583,7 +585,7 @@ const insertResults = async () => {
           await insertParticipates(
             meet,
             womensTeam,
-            "womens",
+            'womens',
             r[1].get(womensTeam)
           );
         } catch (err) {
