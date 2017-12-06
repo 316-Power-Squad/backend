@@ -31,7 +31,6 @@ export const Schemas = [
     name varchar(255) NOT NULL,
     region_id int NOT NULL REFERENCES Region(id),
     gender ENUM('mens', 'womens') NOT NULL,
-    region varchar(255) NOT NULL,
     PRIMARY KEY (ID),
     UNIQUE(name, gender)
   )

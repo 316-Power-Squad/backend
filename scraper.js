@@ -420,6 +420,7 @@ const getResults = async () => {
       await insertTeam(teams[i][0], 'mens', region);
       await insertTeam(teams[i][0], 'womens', region);
     } catch (err) {
+      console.log(err);
       console.log(`Error inserting team ${teams[i][0]}`);
     }
   }
@@ -512,18 +513,20 @@ const insertMeet = async (name, date) => {
 };
 
 const insertTeam = async (name, gender, region) => {
+  const lastIndex = region.lastIndexOf(' ');
+  let actualRegion = region.substring(0, lastIndex);
   console.log(`Inserting a team ${name} with region ${region}`);
   return new Promise((resolve, reject) => {
-    db
-      .get()
-      .query(
-        `INSERT INTO Team (name, gender, region) values (?, ?, ?)`,
-        [name, gender, region],
-        err => {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
+    db.get().query(
+      `INSERT INTO Team (name, gender, region_id) values (?, ?, (
+          SELECT id from Region WHERE Region.name=?
+        ))`,
+      [name, gender, actualRegion],
+      err => {
+        if (err) reject(err);
+        else resolve();
+      }
+    );
   });
 };
 
@@ -567,9 +570,9 @@ const mapResults = async () => {
 
 const insertResults = async () => {
   return new Promise(async (resolve, reject) => {
+    await insertRegions();
     let results = await mapResults();
     //console.log(results);
-    await insertRegions();
     for (let meet of results.keys()) {
       let r = results.get(meet);
       console.log(meet);
