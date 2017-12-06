@@ -477,15 +477,16 @@ const insertRegions = async region => {
   return new Promise((resolve, reject) => {
     db.get().query(
       `INSERT INTO Region (name) values
-      ('northeast region'),
-      ('mid-atlantic region'),
-      ('southeast region'),
-      ('south region'),
-      ('south central region'),
-      ('great lakes region'),
-      ('midwest region'),
-      ('mountain region'),
-      ('west region')
+      ('northeast'),
+      ('mid-atlantic'),
+      ('southeast'),
+      ('south'),
+      ('south central'),
+      ('great lakes'),
+      ('midwest'),
+      ('mountain'),
+      ('west'),
+      ('N/A')
     `,
       [],
       err => {
@@ -515,6 +516,9 @@ const insertMeet = async (name, date) => {
 const insertTeam = async (name, gender, region) => {
   const lastIndex = region.lastIndexOf(' ');
   let actualRegion = region.substring(0, lastIndex);
+  if (!actualRegion) {
+    actualRegion = "N/A"
+  }
   console.log(`Inserting a team ${name} with region ${region}`);
   return new Promise((resolve, reject) => {
     db.get().query(
