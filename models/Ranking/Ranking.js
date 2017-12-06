@@ -68,6 +68,7 @@ export const getMeets = async gender => {
           WHERE Participates.meet_id = Meet.id
           AND Participates.team_id = Team.id
           AND Team.gender = ?
+          ORDER BY Meet.name, Participates.placement
         `,
         [gender]
       );
