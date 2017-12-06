@@ -1,18 +1,36 @@
 import db from '../../helpers/db';
 
+/**
+ * Helper function to format the output of the database in a way that the
+ * algorithm can actually read
+ * @param {* Array} rows
+ */
+const formatRegions = rows => {
+  let res = {};
+  for (let row of rows) {
+    if (!res[row.region_name]) {
+      res[row.region_name] = [row.team_name];
+    } else {
+      let curr_teams = res[row.region_name];
+      curr_teams.push(row.team_name);
+      res[row.region_name] = curr_teams;
+    }
+  }
+  return res;
+};
+
 export const getRegionals = gender => {
   return new Promise(async (resolve, reject) => {
     try {
-      let regions = [];
       const rows = await db.queryAsync(
-        `SELECT * FROM Region, Team WHERE Region.id = Team.region_id and Team.gender=?`,
+        `SELECT Region.name as region_name, 
+          Team.name as team_name
+         FROM Region, Team 
+         WHERE Region.id = Team.region_id
+         AND Team.gender=?`,
         [gender]
       );
-      // Iterate over each region
-      for (let row of rows) {
-        regions.push(row.name);
-      }
-      resolve(regions);
+      resolve(formatRegions(rows));
     } catch (err) {
       reject(err);
     }
