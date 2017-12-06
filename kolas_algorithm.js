@@ -139,12 +139,8 @@ let selectTeam = function(cur_data,region,ind,awardpoints) {
   //   # iterate through teams that beat me here, but don't bother listing a team if it's already
   //   #   been selected or if it's in the top 2 in its region
     // console.log("l for " + m + " is " + l);
-    for (let j = 0; j < l.length; j++){
+    for (let j = 0; j < l.indexOf(selected); j++){
       let t = l[j];
-      // console.log(t);
-      if(t === selected){
-        break;
-      }
       let addme = true;
       if(d2.teamsin.indexOf(t) > -1){
         addme = false;
@@ -195,15 +191,15 @@ let getEligible = function(data){
     if (data.curr_inds[rname] < l.length){
       ans.push(l[data.curr_inds[rname]]);
       if(data.teamsin.length < 30 && !data.pushes_used[rname] && data.curr_inds[rname]+1 < l.length){
-        if(data.dont_push.indexOf(l[data.curr_inds[rname]+1]) > -1){
-          ans.push(l[data.curr_inds[rname]+1])
+        if(data.dont_push.indexOf(l[data.curr_inds[rname]+1]) < 0){
+          ans.push(l[data.curr_inds[rname]+1]);
         }
       }
     }
   }
   return ans.sort(function(a, b) {
     return data.points[a] - data.points[b];
-  }).reverse(); //pick up from print points etc. do the other methods (dowinner, resolveties, printpoints)
+  }).reverse();
 }
 
 let resolveTies = function(oldtied, d){
@@ -487,6 +483,7 @@ let doWinner = function(d, winner, el){
       regwin = r;
     }
   }
+  console.log("In " + regwin + " finding " + winner)
   let indwin = regionals[regwin].teams.indexOf(winner);
 
   if(indwin == d.curr_inds[regwin]){
@@ -505,11 +502,15 @@ let doWinner = function(d, winner, el){
   let tryme = el;
   tryme.splice(tryme.indexOf(winner),1);
   let d2 = d.createCopy();
-  d2.messages.push(winner + " not selected with push (gets in later on their own)\n");
+  // d2.messages.push(winner + " not selected with push (gets in later on their own)\n");
+  console.log(winner + " not selected with push (gets in later on their own)\n");
   d2.dont_push.push(winner);
   let final = pickFrom(d2,tryme);
   if(final == null){
     return null;
+  }
+  if(final.teamsin.indexOf(winner) > -1){
+    return final;
   }
   // # they did get in on their own
   // # they didn't get in on their own, so use the push and select both teams
@@ -528,6 +529,7 @@ let pickFrom = function(d,el){
       tied.push(t);
     }
   }
+  console.log("El: " + d);
   let winner = resolveTies(tied, d);
 
   if(winner.length > 1){
@@ -547,10 +549,12 @@ let pickFrom = function(d,el){
     let d2 = d.createCopy();
     d2.messages.push("\nTie between " + winner + " of size " + winner.length + "\n");
     d2.messages.push("Manually broke tie by picking " + choice + "\n\n");
+    console.log("first");
     return doWinner(d2,choice,el);
   }
 
   d.messages.push("\n");
+  console.log(winner);
   return doWinner(d,winner[0],el);
 }
 
@@ -575,7 +579,7 @@ let printPoints = function(el, data){
   let pts_keys = Object.keys(pts_to_teams).sort(function(a, b) {
     return parseInt(a) - parseInt(b);
   }).reverse();
-  data.messages.push("pts: " + pts_keys + "\n");
+  // data.messages.push("pts: " + pts_keys + "\n");
   for(let i = 0; i < pts_keys.length; i++){
     let pts = pts_keys[i];
     let teamlist = pts_to_teams[pts];
@@ -601,8 +605,22 @@ let printPoints = function(el, data){
   data.messages.push("\n");
 }
 
-export default async () => {
-	return new Promise((resolve, reject) => {
+let doSelection = function(d){
+  if(d.teamsin.length >= 31){
+    console.log(d.teamsin);
+    console.log("DONE-----------------------------------------------");
+    return d;
+  }
+  console.log("keep going? " + d.teamsin.length);
+  let el = getEligible(d);
+  // console.log(el);
+  printPoints(el,d);
+  console.log("in do Selection " + el.length)
+  return pickFrom(d,el);
+}
+
+// export default async () => {
+// 	return new Promise((resolve, reject) => {
     let new_regionals = {};
     for (let rname in regionals) {
       let teamlist = regionals[rname];
@@ -623,15 +641,6 @@ export default async () => {
 
 
     //"do next step of selection"
-    let doSelection = function(d){
-      if(d.teamsin.length == 31){
-        return d;
-      }
-      let el = getEligible(d);
-      // console.log(el);
-      printPoints(el,d);
-      return pickFrom(d,el);
-    }
 
 
     // # Start from a blank slate
@@ -673,6 +682,7 @@ export default async () => {
 
     // # Select at-large teams
     let results = doSelection(data);
+    console.log("It is finished");
     if(results == null || results.length == 0){
       console.log("There was an error!!");
     }
@@ -686,13 +696,13 @@ export default async () => {
       console.log("");
       console.log(results.messages.join(""));
     }
-		if (err) {
-			reject({
-				code: 'some_unique_code',
-				message: 'some error message'
-			});
-		}
-    
-		resolve(results.teamsin);
-	})
-}
+		// if (err) {
+		// 	reject({
+		// 		code: 'some_unique_code',
+		// 		message: 'some error message'
+		// 	});
+		// }
+
+// 		resolve(results.teamsin);
+// 	})
+// }

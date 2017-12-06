@@ -31,15 +31,15 @@
 import sys,operator
 
 regionals    = dict(
-great_lakes   = ['Michigan', 'Wisconsin', 'Michigan State', 'Ohio State', 'Eastern Michigan', 'Indiana', 'Toledo', 'Miami (Ohio)', 'Notre Dame', 'Purdue', 'Dayton', 'Oakland', 'Marquette', 'Xavier  (Ohio)', 'Central Michigan'],  # PROJECTED
-mid_atlantic  = ['Villanova', 'Penn State', 'Georgetown', 'West Virginia', 'Princeton', 'Pittsburgh', 'Penn', 'Bucknell', 'Navy', 'Maryland', 'Lehigh', 'American', 'Temple', 'Delaware', 'Duquesne'],  # PROJECTED
-midwest       = ['Minnesota', 'Iowa State', 'Oklahoma State', 'Missouri', 'Northwestern', 'Bradley', 'South Dakota', 'Kansas', 'Oklahoma', 'Tulsa', 'Northern Iowa', 'Northern Illinois', 'Loyola-Chicago', 'Iowa', 'Creighton'],  # PROJECTED
-mountain      = ['Colorado', 'New Mexico', 'Utah State', 'BYU', 'Northern Arizona', 'Utah', 'Air Force', 'Nevada', 'Montana State', 'Colorado St.', 'UTEP', 'Southern Utah', 'Idaho State', 'Weber State', 'Utah Valley'],  # PROJECTED
-northeast     = ['Providence', 'Columbia', 'Dartmouth', 'Syracuse', 'Yale', 'Cornell', 'Connecticut', 'Iona', 'Brown', 'New Hampshire', 'Buffalo', 'Army West Point', 'Boston College', 'UMass Lowell', 'Sacred Heart'],  # PROJECTED
-south         = ['Georgia', 'Ole Miss', 'Miss State', 'Alabama', 'Florida State', 'Vanderbilt', 'Samford', 'Georgia Tech', 'Belmont', 'North Florida', 'Southern Miss.', 'Lipscomb', 'UAB', 'Tennessee', 'Jacksonville'],  # PROJECTED
-south_central = ['Arkansas', 'Abilene Christian', 'Texas', 'Baylor', 'SMU', 'Lamar', 'Texas A&M', 'McNeese State', 'TCU', 'Rice', 'Tulane', 'North Texas', 'Texas State', 'Texas A&M-Corpus Christi', 'Stephen F. Austin'],  # PROJECTED
-southeast     = ['North Carolina St.', 'Furman', 'Eastern Kentucky', 'Louisville', 'Virginia Tech', 'Wake Forest', 'Duke', 'Virginia', 'Kentucky', 'Charlotte', 'James Madison', 'North Carolina', 'Richmond', 'Davidson', 'William and Mary'],  # PROJECTED
-west          = ['Oregon', 'Stanford', 'San Francisco', 'Boise State', 'Washington', 'California', 'Arizona', 'UCLA', 'Arizona State', 'Loyola Marymount', 'Portland', 'Washington St.', 'Oregon State', 'UC Santa Barbara', 'Cal Poly'],  # PROJECTED
+great_lakes   = ['Michigan', 'Michigan State', 'Wisconsin', 'Eastern Michigan', 'Indiana', 'Notre Dame', 'Ohio State', 'Dayton', 'Toledo', 'Purdue',  'Miami (Ohio)', 'Marquette', 'Indiana State', 'Xavier  (Ohio)', 'Oakland'],  # PROJECTED
+mid_atlantic  = ['Penn State', 'Villanova', 'Georgetown', 'Princeton', 'Pittsburgh', 'Penn', 'West Virginia', 'Bucknell', 'Maryland', 'Temple', 'Duquesne', 'Navy', 'St. Josephs', 'Lehigh', 'American'],  # PROJECTED
+midwest       = ['Iowa State', 'Oklahoma State', 'Minnesota', 'Missouri', 'South Dakota', 'Bradley', 'Northern Iowa', 'Tulsa', 'Northwestern', 'Kansas', 'Northern Illinois', 'Iowa', 'Oklahoma', 'Creighton', 'South Dakota St.'],  # PROJECTEDx
+mountain      = ['Colorado', 'New Mexico', 'BYU', 'Utah State', 'Utah', 'Air Force', 'Colorado St.', 'Northern Arizona', 'Nevada', 'Montana State', 'Weber State', 'Idaho State', 'Utah Valley', 'UTEP', 'Wyoming'],  # PROJECTED
+northeast     = ['Providence', 'Dartmouth', 'Syracuse', 'Columbia', 'Yale', 'Iona', 'Brown',  'Cornell', 'New Hampshire', 'Buffalo',  'Marist', 'Harvard', 'UMass Lowell', 'Boston College', 'UMass Amherst'],  # PROJECTED
+south         = ['Ole Miss', 'Georgia', 'Samford', 'Florida State', 'Georgia Tech', 'Auburn', 'Miss State', 'Vanderbilt', 'Alabama', 'Tennessee', 'Jacksonville', 'Southern Miss.', 'North Florida', 'Belmont', 'UAB'],  # PROJECTED
+south_central = ['Arkansas', 'Texas', 'Baylor', 'SMU', 'Abilene Christian', 'Texas A&M', 'TCU', 'Tulane', 'North Texas', 'Lamar', 'Rice', 'McNeese State', 'Texas State', 'LSU', 'Arkansas State'],  # PROJECTED
+southeast     = ['North Carolina St.', 'Furman', 'Eastern Kentucky', 'Virginia Tech', 'Louisville', 'Wake Forest', 'Virginia', 'Richmond', 'Davidson', 'Duke', 'Kentucky', 'James Madison', 'North Carolina', 'Charlotte', 'Elon'],  # PROJECTED
+west          = ['San Francisco', 'Stanford', 'Oregon', 'Boise State', 'California', 'Washington', 'Arizona', 'San Jose St.', 'Arizona State', 'Portland', 'Loyola Marymount', 'UCLA', 'Oregon State', 'Idaho', 'Washington St.']  # PROJECTED
 )
 
 
