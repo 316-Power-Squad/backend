@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js --exec babel-node --presets  es2015,stage-2",
-    "serve": "babel-node index.js --presets es2015,stage-2",
+    "start": "node ./build/index.js",
+    "clean": "rm -rf build && mkdir build",
+    "build-server": "babel -d ./build ./server -s",
+    "build": "yarn run clean && yarn build-server",
     "scrape": "babel-node scraper.js --presets es2015,stage-2",
     "seed": "babel-node seed.js --presets es2015,stage-2",
     "test": "jest"
