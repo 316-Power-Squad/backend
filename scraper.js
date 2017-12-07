@@ -130,7 +130,10 @@ const getNC = function(school) {
   let splitSchool = school.split(' ');
   if (school.includes('Chapel Hill')) {
     return 'North Carolina';
-  } else {
+  } else if (school.includes('Charlotte')) {
+    return 'Charlotte';
+  }
+  else {
     return 'UNC_'.concat(splitSchool[2]);
   }
 };
@@ -218,6 +221,38 @@ const getTeamName = function(school) {
   }
   if (school.includes('Army')) {
     return 'Army_West_Point';
+  } if (school.includes('Indiana University Purdue University Indianapolis')) {
+    return 'IUPUI';
+  } if (school.includes('Bowling Green')) {
+    return 'Bowling_Green';
+  } if (school.includes('Miami University')) {
+    return 'Miami_OH';
+  } if (school.includes('Ohio University')) {
+    return 'Ohio';
+  } if (school.includes('Bloomington')) {
+    return 'Indiana';
+  } if (school.includes('University–Stillwater')) {
+    return 'Oklahoma_State';
+  } if (school.includes('Urbana')) {
+    return 'Illinois';
+  }  if (school.includes('Lincoln')) {
+    return 'Nebraska';
+  } if (school.includes('Kansas City')) {
+    return 'UMKC';
+  } if (school.includes('Lowell')) {
+    return 'UMass_Lowell';
+  } if (school.includes('Middle Tennessee')) {
+    return 'Mid_Tenn_State';
+  } if (school.includes('Georgia Institute of Technology')) {
+    return 'Georgia_Tech';
+  } if (school.includes('University of Louisiana at Lafayette')) {
+    return 'UL_Lafayette';
+  } if (school.includes('Louisiana State University')) {
+    return 'LSU';
+  } if (school.includes('Charlotte')) {
+    return 'Charlotte';
+  } if (school.includes(`Saint Joseph's University`)) {
+    return 'St_Josephs_PA'
   }
   for (var i = 0; i < splitSchool.length; i++) {
     if (splitSchool[i].includes('!')) {
@@ -344,6 +379,22 @@ const fetchMeets = async url => {
       url = url.replace('Northwestern', 'Northwestern_IL');
     } else if (url.endsWith('California')) {
       url = url.replace('California', 'California_CA');
+    } else if (url.endsWith('Ohio')) {
+      url = url.replace('Ohio', 'Ohio_U');
+    } else if (url.toLowerCase().includes('in_college_f_indiana')) {
+      url = url.toLowerCase().replace('in_college_f_indiana', 'IN_college_f_Indiana_IN');
+    } else if (url.endsWith('Miami')) {
+      url = url.replace('Miami', 'Miami_FL');
+    } else if (url.endsWith('William_and_Mary')) {
+      url.replace('William_and_Mary', 'William__Mary');
+    } else if (url.includes('Joseph')) {
+      url.replace(`Saint_Joseph's`, 'St_Josephs_PA');
+    } else if (url.includes('Manhattan_College')) {
+      url = url.replace('Manhattan College', 'Manhattan');
+    } if (url.contains('Notre_Dame')) {
+      url = url.replace('Notre_Dame_IN');
+    } if (url.endsWith('Georgetown')) {
+        url = url.replace('Georgetown', 'Georgetown_DC');
     }
     let meets = new Map();
     let meetDates = new Map();
@@ -546,13 +597,14 @@ const insertTeam = async (name, gender, region) => {
   if (!actualRegion) {
     actualRegion = 'N/A';
   }
-  console.log(`Inserting a team ${name} with region ${region}`);
+  const team = name.replace(/_/g, ' ');
+  console.log(`Inserting a team ${team} with region ${region}`);
   return new Promise((resolve, reject) => {
     db.get().query(
       `INSERT INTO Team (name, gender, region_id) values (?, ?, (
           SELECT id from Region WHERE Region.name=?
         ))`,
-      [name, gender, actualRegion],
+      [team, gender, actualRegion],
       err => {
         if (err) reject(err);
         else resolve();
