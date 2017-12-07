@@ -204,12 +204,15 @@ const getTeamName = function(school) {
   }
   if (school.includes('East Tennessee State University')) {
     return 'East_Tenn_St';
-  } if (school.includes('Providence College')) {
+  }
+  if (school.includes('Providence College')) {
     return 'Providence';
-  } if (school.includes('Iona College')) {
+  }
+  if (school.includes('Iona College')) {
     return 'Iona';
-  } if (school.includes('Army')) {
-    return ('Army_West_Point');
+  }
+  if (school.includes('Army')) {
+    return 'Army_West_Point';
   }
   for (var i = 0; i < splitSchool.length; i++) {
     if (splitSchool[i].includes('!')) {
@@ -428,13 +431,13 @@ const getResults = async () => {
     meetDates = new Map([...meetDates, ...newMeets.dates]);
     region = newMeets.region;
     url = teamBaseUrl
-    .concat(teams[i][1])
-    .concat('_college_f_')
-    .concat(teams[i][0]);
+      .concat(teams[i][1])
+      .concat('_college_f_')
+      .concat(teams[i][0]);
     newMeets = await fetchMeets(url);
     meets = new Map([...meets, ...newMeets.meets]);
     meetDates = new Map([...meetDates, ...newMeets.dates]);
-    region = region? region : newMeets.region;
+    region = region ? region : newMeets.region;
     try {
       await insertTeam(teams[i][0], 'mens', region);
       await insertTeam(teams[i][0], 'womens', region);
@@ -536,15 +539,16 @@ const insertTeam = async (name, gender, region) => {
   const lastIndex = region.lastIndexOf(' ');
   let actualRegion = region.substring(0, lastIndex);
   if (!actualRegion) {
-    actualRegion = "N/A"
+    actualRegion = 'N/A';
   }
-  console.log(`Inserting a team ${name} with region ${region}`);
+  const team = name.replace(/_/g, ' ');
+  console.log(`Inserting a team ${team} with region ${region}`);
   return new Promise((resolve, reject) => {
     db.get().query(
       `INSERT INTO Team (name, gender, region_id) values (?, ?, (
           SELECT id from Region WHERE Region.name=?
         ))`,
-      [name, gender, actualRegion],
+      [team, gender, actualRegion],
       err => {
         if (err) reject(err);
         else resolve();
