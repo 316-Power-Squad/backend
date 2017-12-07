@@ -3,7 +3,17 @@ import cheerio from 'cheerio';
 import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
 
 const specialCases = new Map([
-  ['IUPUI', 'Indiana University Purdue University Indianapolis'],
+  ['Miami (Ohio)', 'Miami OH'],
+  ['Boston University', 'Boston U'],
+  ['Dartmouth', 'Dartmouth College'],
+  ['Manhattan', 'Manhattan College'],
+  ['Ole Miss', 'Mississippi'],
+  ['UT Martin', 'Tennessee Martin'],
+  ['ETSU', 'East Tenn St'],
+  ['Louisiana-Lafayette', 'UL Lafayette'],
+  ['NC State', 'North Carolina St'],
+  ['Middle Tennessee', 'Mid Tenn St'],
+  [`Saint Joseph’s`, 'St Josephs PA'],
 ]);
 
 const dbMode =
@@ -22,13 +32,13 @@ const fetchRankings = gender => {
         let teamName = '';
         let counter = 0;
         $('td').each(async function(i, elem) {
-          if (counter >= 15) return;
           if ($(this).attr('bgcolor') === '#A6CAFF') {
             counter = 0;
             regionName = $(this)
               .text()
               .toLowerCase();
           }
+          if (counter >= 15) return;
           if (
             $(this)
               .children()
