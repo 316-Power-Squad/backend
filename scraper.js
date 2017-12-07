@@ -204,6 +204,12 @@ const getTeamName = function(school) {
   }
   if (school.includes('East Tennessee State University')) {
     return 'East_Tenn_St';
+  } if (school.includes('Providence College')) {
+    return 'Providence';
+  } if (school.includes('Iona College')) {
+    return 'Iona';
+  } if (school.includes('Army')) {
+    return ('Army_West_Point');
   }
   for (var i = 0; i < splitSchool.length; i++) {
     if (splitSchool[i].includes('!')) {
@@ -326,6 +332,11 @@ const formatDate = function(date) {
 
 const fetchMeets = async url => {
   return new Promise((resolve, reject) => {
+    if (url.endsWith('Northwestern')) {
+      url = url.replace('Northwestern', 'Northwestern_IL');
+    } else if (url.endsWith('California')) {
+      url = url.replace('California', 'California_CA');
+    }
     let meets = new Map();
     let meetDates = new Map();
     let finalRegion = '';
@@ -405,8 +416,8 @@ const getResults = async () => {
   let teamNames = populateTeams(teams);
   let meets = new Map();
   let meetDates = new Map();
-  let region = '';
   for (var i = 0; i < teams.length; i++) {
+    let region = '';
     if (teams[i][0] === 'School') continue;
     let url = teamBaseUrl
       .concat(teams[i][1])
@@ -416,6 +427,14 @@ const getResults = async () => {
     meets = new Map([...meets, ...newMeets.meets]);
     meetDates = new Map([...meetDates, ...newMeets.dates]);
     region = newMeets.region;
+    url = teamBaseUrl
+    .concat(teams[i][1])
+    .concat('_college_f_')
+    .concat(teams[i][0]);
+    newMeets = await fetchMeets(url);
+    meets = new Map([...meets, ...newMeets.meets]);
+    meetDates = new Map([...meetDates, ...newMeets.dates]);
+    region = region? region : newMeets.region;
     try {
       await insertTeam(teams[i][0], 'mens', region);
       await insertTeam(teams[i][0], 'womens', region);
