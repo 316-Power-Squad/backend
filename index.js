@@ -6,6 +6,8 @@ import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
 import apiRouter from './routers/api';
 import userRouter from './routers/User';
 
+const PORT = process.env.PORT || 5000;
+
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -25,8 +27,8 @@ db.connect(MODE_TEST, function(err) {
     app.use('/auth', userRouter);
 
     // Define the port we are listening on
-    app.listen(3001, () => {
-      console.log('Listening on port 3001...');
+    app.listen(PORT, () => {
+      console.log(`Listening on port ${PORT}...`);
     });
   }
 });
