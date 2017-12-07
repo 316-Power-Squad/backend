@@ -6,10 +6,10 @@ import algorithm from '../../kolas_algorithm';
 
 router.get('/', async (req, res) => {
   try {
-    // const teams = await Ranking.getRegionals('mens');
-    const meets = await Ranking.getMeets('mens');
+    const teams = await Ranking.getRegionals('mens');
+    // const meets = await Ranking.getMeets('mens');
     // const result = await algorithm();
-    res.send(formatResponse(meets));
+    res.send(formatResponse(teams));
   } catch (err) {
     res.send(formatResponse({}, err));
   }

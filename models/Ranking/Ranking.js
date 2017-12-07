@@ -27,7 +27,9 @@ export const getRegionals = gender => {
           Team.name as team_name
          FROM Region, Team 
          WHERE Region.id = Team.region_id
-         AND Team.gender=?`,
+         AND Team.gender=?
+         AND Region.name <> 'N/A' 
+        `,
         [gender]
       );
       resolve(formatRegions(rows));
