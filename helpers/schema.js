@@ -48,7 +48,6 @@ export const Schemas = [
     team_id int NOT NULL REFERENCES Team(id),
     region_id int NOT NULL REFERENCES Region(id),
     rank int NOT NULL,
-    UNIQUE(region_id, rank),
     PRIMARY KEY (team_id)
   )
 `,

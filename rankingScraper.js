@@ -1,4 +1,4 @@
-import request from 'request';
+import request from 'request-promise';
 import cheerio from 'cheerio';
 import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
 
@@ -13,7 +13,19 @@ const specialCases = new Map([
   ['Louisiana-Lafayette', 'UL Lafayette'],
   ['NC State', 'North Carolina St'],
   ['Middle Tennessee', 'Mid Tenn St'],
-  [`Saint Joseph’s`, 'St Josephs PA'],
+  ['Saint Joseph’s', 'St Josephs PA'],
+  ['Ohio State', 'Ohio State University'],
+  ['Maryland', 'Maryland College Park'],
+  ['Loyola-Chicago', 'Loyola University Chicago'],
+  ['Nevada', 'Nevada Las Vegas'],
+  ['Mississippi State', 'Mississippi Valley State'],
+  ['Southern Miss', 'Southern Mississippi'],
+  ['UAB', 'Alabama Birmingham'],
+  ['SMU', 'Southern Methodist'],
+  ['TCU', 'Texas Christian'],
+  ['Texas A&M-Corpus Christi', 'Texas A&M University–Corpus Christi'],
+  ['Stephen F. Austin', 'Stephen F. Austin State'],
+  ['Davidson', 'Davidson College'],
 ]);
 
 const dbMode =
@@ -21,53 +33,50 @@ const dbMode =
     ? MODE_PRODUCTION
     : MODE_TEST;
 
-const fetchRankings = gender => {
+const fetchRankings = (url, gender) => {
   return new Promise(async (resolve, reject) => {
-    const urls = await getMostRecentUrls();
-    const url = gender === 'womens' ? urls[0] : urls[1];
-    request(url, (err, resp, body) => {
-      if (!err && resp.statusCode == 200) {
-        let $ = cheerio.load(body);
-        let regionName = '';
-        let teamName = '';
-        let counter = 0;
-        $('td').each(async function(i, elem) {
-          if ($(this).attr('bgcolor') === '#A6CAFF') {
-            counter = 0;
-            regionName = $(this)
-              .text()
-              .toLowerCase();
-          }
-          if (counter >= 15) return;
-          if (
-            $(this)
-              .children()
-              .first()
-              .attr('target') === '_blank'
-          ) {
-            teamName = $(this)
-              .children()
-              .first()
-              .text();
-            counter++;
+    const response = await request({ uri: url, resolveWithFullResponse: true });
+    if (response.statusCode !== 200) reject('Incorrect status');
+    let $ = cheerio.load(response.body);
+    let regionName = '';
+    let teamName = '';
+    let counter = 0;
+    let regionCount = 0;
+    $('td').each(async function(i, elem) {
+      if (['#f2dddc', '#A6CAFF'].includes($(this).attr('bgcolor'))) {
+        counter = 0;
+        regionCount++;
+        regionName = $(this)
+          .text()
+          .toLowerCase();
+      }
+      if (counter >= 15) {
+        if (regionCount > 8) resolve();
+        return;
+      }
+      if (
+        $(this)
+          .children()
+          .first()
+          .attr('target') === '_blank'
+      ) {
+        teamName = $(this)
+          .children()
+          .first()
+          .text();
+        counter++;
 
-            if (regionName !== '' && teamName !== '') {
-              try {
-                // If there is a naming disparity look it up
-                const team = specialCases.has(teamName)
-                  ? specialCases.get(teamName)
-                  : teamName;
-                await insertRank(team, gender, regionName, counter);
-              } catch (err) {
-                // console.log(`Failed from team ${team}, ${gender}`);
-                console.log(err);
-              }
-            }
+        if (regionName !== '' && teamName !== '') {
+          try {
+            // If there is a naming disparity look it up
+            const team = specialCases.has(teamName)
+              ? specialCases.get(teamName)
+              : teamName;
+            await insertRank(team, gender, regionName, counter);
+          } catch (err) {
+            reject(err);
           }
-        });
-        resolve();
-      } else {
-        reject(err);
+        }
       }
     });
   });
@@ -79,6 +88,7 @@ const insertRank = async (team, gender, region, rank) => {
   console.log(
     `Inserting a team ${team} with region ${actualRegion} and rank ${rank}`
   );
+  // if (gender === 'womens') console.log('womens team inserted');
   return new Promise((resolve, reject) => {
     db.get().query(
       `INSERT INTO RegionalRank (team_id, region_id, rank) values (
@@ -88,8 +98,10 @@ const insertRank = async (team, gender, region, rank) => {
         )`,
       [team, gender, actualRegion, rank],
       err => {
-        if (err) reject(err);
-        else resolve();
+        if (err) {
+          console.log(err);
+          reject(err);
+        } else resolve();
       }
     );
   });
@@ -98,32 +110,30 @@ const insertRank = async (team, gender, region, rank) => {
 // line 5 shouldn't be hardcoded -- in the future it should call a helper message like the following to get the url
 
 const getMostRecentUrls = async () => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     let urls = [];
     let sourceUrl =
       'http://www.ustfccca.org/category/rankings-polls/cross-country-polls/div-1-cross-country';
-    request(sourceUrl, async (err, resp, body) => {
-      if (!err && resp.statusCode == 200) {
-        let $ = cheerio.load(body);
-        let allArchivesDiv = $('div[class=facetwp-template]');
-        let paragraphs = allArchivesDiv.children();
-        paragraphs.each(function(i, elem) {
-          let link = $(this)
-            .children()
-            .first();
-          if (link !== undefined) {
-            let url = link.attr('href');
-            if (url !== undefined && url.indexOf('regional') > -1) {
-              urls.push(url);
-            } else if (url !== undefined && url.indexOf('region') > -1) {
-              urls.push(url);
-              resolve(urls);
-            }
-          }
-        });
-      } else {
-        console.log(resp.statusCode);
-        reject(err);
+    const response = await request({
+      uri: sourceUrl,
+      resolveWithFullResponse: true,
+    });
+    if (response.statusCode !== 200) reject('Incorrect status code');
+    let $ = cheerio.load(response.body);
+    let allArchivesDiv = $('div[class=facetwp-template]');
+    let paragraphs = allArchivesDiv.children();
+    paragraphs.each(function(i, elem) {
+      let link = $(this)
+        .children()
+        .first();
+      if (link !== undefined) {
+        let url = link.attr('href');
+        if (url !== undefined && url.indexOf('regional') > -1) {
+          urls.push(url);
+        } else if (url !== undefined && url.indexOf('region') > -1) {
+          urls.push(url);
+          resolve(urls);
+        }
       }
     });
   });
@@ -131,9 +141,13 @@ const getMostRecentUrls = async () => {
 
 const insertRankings = mode => {
   db.connect(mode, async () => {
-    await fetchRankings('mens');
-    await fetchRankings('womens');
-    db.disconnect();
+    try {
+      const urls = await getMostRecentUrls();
+      await fetchRankings(urls[1], 'mens');
+      await fetchRankings(urls[0], 'womens');
+    } catch (err) {
+      console.log(err);
+    }
   });
 };
 

@@ -1,6 +1,11 @@
 import request from 'request';
 import cheerio from 'cheerio';
-import db, { MODE_TEST } from './helpers/db';
+import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
+
+const mode =
+  process.argv[process.argv.length - 1] === 'prod'
+    ? MODE_PRODUCTION
+    : MODE_TEST;
 
 let urls = [];
 // ex. https://www.tfrrs.org/teams/xc/NC_college_m_Duke.html
@@ -127,8 +132,7 @@ const getNC = function(school) {
     return 'North Carolina';
   } else if (school.includes('Charlotte')) {
     return 'Charlotte';
-  }
-  else {
+  } else {
     return 'UNC_'.concat(splitSchool[2]);
   }
 };
@@ -216,38 +220,54 @@ const getTeamName = function(school) {
   }
   if (school.includes('Army')) {
     return 'Army_West_Point';
-  } if (school.includes('Indiana University Purdue University Indianapolis')) {
+  }
+  if (school.includes('Indiana University Purdue University Indianapolis')) {
     return 'IUPUI';
-  } if (school.includes('Bowling Green')) {
+  }
+  if (school.includes('Bowling Green')) {
     return 'Bowling_Green';
-  } if (school.includes('Miami University')) {
+  }
+  if (school.includes('Miami University')) {
     return 'Miami_OH';
-  } if (school.includes('Ohio University')) {
+  }
+  if (school.includes('Ohio University')) {
     return 'Ohio';
-  } if (school.includes('Bloomington')) {
+  }
+  if (school.includes('Bloomington')) {
     return 'Indiana';
-  } if (school.includes('University–Stillwater')) {
+  }
+  if (school.includes('University–Stillwater')) {
     return 'Oklahoma_State';
-  } if (school.includes('Urbana')) {
+  }
+  if (school.includes('Urbana')) {
     return 'Illinois';
-  }  if (school.includes('Lincoln')) {
+  }
+  if (school.includes('Lincoln')) {
     return 'Nebraska';
-  } if (school.includes('Kansas City')) {
+  }
+  if (school.includes('Kansas City')) {
     return 'UMKC';
-  } if (school.includes('Lowell')) {
+  }
+  if (school.includes('Lowell')) {
     return 'UMass_Lowell';
-  } if (school.includes('Middle Tennessee')) {
+  }
+  if (school.includes('Middle Tennessee')) {
     return 'Mid_Tenn_State';
-  } if (school.includes('Georgia Institute of Technology')) {
+  }
+  if (school.includes('Georgia Institute of Technology')) {
     return 'Georgia_Tech';
-  } if (school.includes('University of Louisiana at Lafayette')) {
+  }
+  if (school.includes('University of Louisiana at Lafayette')) {
     return 'UL_Lafayette';
-  } if (school.includes('Louisiana State University')) {
+  }
+  if (school.includes('Louisiana State University')) {
     return 'LSU';
-  } if (school.includes('Charlotte')) {
+  }
+  if (school.includes('Charlotte')) {
     return 'Charlotte';
-  } if (school.includes(`Saint Joseph's University`)) {
-    return 'St_Josephs_PA'
+  }
+  if (school.includes(`Saint Joseph's University`)) {
+    return 'St_Josephs_PA';
   }
   for (var i = 0; i < splitSchool.length; i++) {
     if (splitSchool[i].includes('!')) {
@@ -377,7 +397,9 @@ const fetchMeets = async url => {
     } else if (url.endsWith('Ohio')) {
       url = url.replace('Ohio', 'Ohio_U');
     } else if (url.toLowerCase().includes('in_college_f_indiana')) {
-      url = url.toLowerCase().replace('in_college_f_indiana', 'IN_college_f_Indiana_IN');
+      url = url
+        .toLowerCase()
+        .replace('in_college_f_indiana', 'IN_college_f_Indiana_IN');
     } else if (url.endsWith('Miami')) {
       url = url.replace('Miami', 'Miami_FL');
     } else if (url.endsWith('William_and_Mary')) {
@@ -386,10 +408,12 @@ const fetchMeets = async url => {
       url.replace(`Saint_Joseph's`, 'St_Josephs_PA');
     } else if (url.includes('Manhattan_College')) {
       url = url.replace('Manhattan College', 'Manhattan');
-    } if (url.contains('Notre_Dame')) {
+    }
+    if (url.includes('Notre_Dame')) {
       url = url.replace('Notre_Dame_IN');
-    } if (url.endsWith('Georgetown')) {
-        url = url.replace('Georgetown', 'Georgetown_DC');
+    }
+    if (url.endsWith('Georgetown')) {
+      url = url.replace('Georgetown', 'Georgetown_DC');
     }
     let meets = new Map();
     let meetDates = new Map();
@@ -612,13 +636,14 @@ const insertParticipates = async (meet, team, gender, place) => {
   console.log(
     `Inserting a participates record ${meet}, ${team}, ${gender}, ${place}`
   );
+  const teamName = team.replace(/_/g, ' ');
   return new Promise((resolve, reject) => {
     let query = `INSERT INTO Participates (team_id, meet_id, placement) values (
       (SELECT ID FROM Team WHERE name=? and gender=?),
       (SELECT ID FROM Meet WHERE name=?),
       ?
     )`;
-    db.get().query(query, [team, gender, meet, place], (err, result) => {
+    db.get().query(query, [teamName, gender, meet, place], (err, result) => {
       if (err) reject(err);
       else resolve();
     });
@@ -678,7 +703,7 @@ const insertResults = async () => {
   });
 };
 
-db.connect(MODE_TEST, async () => {
+db.connect(mode, async () => {
   await insertResults();
   db.disconnect();
 });
