@@ -16,8 +16,12 @@
   "author": "316 Power Squad",
   "license": "''''''''''''''''''''''''''''''''",
   "dependencies": {
+    "apicache": "^1.1.0",
     "async": "^2.5.0",
     "asyncawait": "^1.0.6",
+    "babel-cli": "^6.26.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-stage-2": "^6.22.0",
     "bcrypt": "^1.0.3",
     "bluebird": "^3.4.7",
     "body-parser": "^1.18.2",
@@ -30,9 +34,7 @@
     "mysql": "^2.14.1",
     "password-validator": "^4.0.0",
     "request": "^2.83.0",
-    "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.22.0",
-    "babel-preset-stage-2": "^6.22.0"
+    "request-promise": "^4.2.2"
   },
   "devDependencies": {
     "jest": "^21.2.0",

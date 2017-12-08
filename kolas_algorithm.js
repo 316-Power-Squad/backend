@@ -1,6 +1,6 @@
-const VERBOSE = process.argv[process.argv.length - 1] === 'verbose';
+const TEST = process.argv[process.argv.length - 1] === 'test';
 
-let regionals = {
+const testRegionals = {
   great_lakes: [
     'Michigan',
     'Michigan State',
@@ -156,7 +156,7 @@ let regionals = {
   ], // PROJECTED
 };
 
-let meets = {
+const testMeets = {
   harry_groves_bucknell_v_georgetown: [
     '2017-09-08',
     ['Georgetown', 'Bucknell'],
@@ -686,7 +686,14 @@ function Data(
   };
 }
 
-let selectTeam = function(cur_data, region, ind, awardpoints) {
+let selectTeam = function(
+  cur_data,
+  region,
+  ind,
+  awardpoints,
+  meets,
+  regionals
+) {
   // console.log(cur_data);
   let d2 = cur_data.createCopy();
   let selected = regionals[region].teams[ind];
@@ -777,7 +784,7 @@ let selectTeam = function(cur_data, region, ind, awardpoints) {
   return d2;
 };
 
-let getEligible = function(data) {
+let getEligible = function(data, regionals) {
   let ans = [];
 
   for (let rname in regionals) {
@@ -804,7 +811,7 @@ let getEligible = function(data) {
     .reverse(); //pick up from print points etc. do the other methods (dowinner, resolveties, printpoints)
 };
 
-let resolveTies = function(oldtied, d) {
+let resolveTies = function(oldtied, d, meets, regionals) {
   let tied = [oldtied];
   if (tied.length == 1) {
     return tied[0];
@@ -1132,21 +1139,21 @@ let resolveTies = function(oldtied, d) {
 };
 
 //"do next step of selection"
-let doSelection = function(d) {
+let doSelection = function(d, meets, regionals) {
   if (d.teamsin.length == 31) {
     return d;
   }
-  let el = getEligible(d);
+  let el = getEligible(d, regionals);
   // console.log(el);
   printPoints(el, d);
-  return pickFrom(d, el);
+  return pickFrom(d, el, meets, regionals);
 };
 
 // # given a data object, a team ("winner") to be selected, and list of other eligible teams
 // # try to select this team
 // # if there is no push, then just select them and continue
 // # otherwise, hairy stuff
-let doWinner = function(d, winner, el) {
+let doWinner = function(d, winner, el, meets, regionals) {
   let regwin = '';
   for (let r in regionals) {
     // console.log(regionals[r]);
@@ -1157,8 +1164,8 @@ let doWinner = function(d, winner, el) {
   let indwin = regionals[regwin].teams.indexOf(winner);
 
   if (indwin == d.curr_inds[regwin]) {
-    d = selectTeam(d, regwin, indwin, true);
-    return doSelection(d);
+    d = selectTeam(d, regwin, indwin, true, meets, regionals);
+    return doSelection(d, meets, regionals);
   }
   // # if not, then this is a push situation
   // # first, we create a copy of the data object and continue running without this team being eligible
@@ -1176,20 +1183,20 @@ let doWinner = function(d, winner, el) {
     winner + ' not selected with push (gets in later on their own)\n'
   );
   d2.dont_push.push(winner);
-  let final = pickFrom(d2, tryme);
+  let final = pickFrom(d2, tryme, meets, regionals);
   if (final == null) {
     return null;
   }
   // # they did get in on their own
   // # they didn't get in on their own, so use the push and select both teams
   // # the pushed team gives no points
-  d = selectTeam(d, regwin, indwin - 1, false);
-  d = selectTeam(d, regwin, indwin, true);
+  d = selectTeam(d, regwin, indwin - 1, false, meets, regionals);
+  d = selectTeam(d, regwin, indwin, true, meets, regionals);
   d.pushes_used[regwin] = true;
-  return doSelection(d);
+  return doSelection(d, meets, regionals);
 };
 
-let pickFrom = function(d, el) {
+let pickFrom = function(d, el, meets, regionals) {
   let tied = [];
   for (let i = 0; i < el.length; i++) {
     let t = el[i];
@@ -1197,7 +1204,7 @@ let pickFrom = function(d, el) {
       tied.push(t);
     }
   }
-  let winner = resolveTies(tied, d);
+  let winner = resolveTies(tied, d, meets, regionals);
 
   if (winner.length > 1) {
     // console.log(d.messages.join("") + "\n\n");
@@ -1218,11 +1225,11 @@ let pickFrom = function(d, el) {
       '\nTie between ' + winner + ' of size ' + winner.length + '\n'
     );
     d2.messages.push('Manually broke tie by picking ' + choice + '\n\n');
-    return doWinner(d2, choice, el);
+    return doWinner(d2, choice, el, meets, regionals);
   }
 
   d.messages.push('\n');
-  return doWinner(d, winner[0], el);
+  return doWinner(d, winner[0], el, meets, regionals);
 };
 
 // # print out the current status of everything
@@ -1285,7 +1292,20 @@ let printPoints = function(el, data) {
   data.messages.push('\n');
 };
 
-const execute = async () => {
+// Map the teams that made it to their point values for use in API
+const mapTeams = results =>
+  results.teamsin
+    .map(team => ({
+      name: team,
+      points: results.points[team],
+    }))
+    .sort((a, b) => a.points - b.points)
+    .map(team => ({
+      ...team,
+      points: team.points === 0 ? 'Auto bid' : team.points,
+    }));
+
+const execute = async (regionals, meets) => {
   return new Promise((resolve, reject) => {
     let new_regionals = {};
     for (let rname in regionals) {
@@ -1336,19 +1356,17 @@ const execute = async () => {
     data.messages.push('Automatically selected:\n');
     for (let i = 0; i < reg_keys.length; i++) {
       let r = reg_keys[i];
-      // console.log("here is the data" + data.teamsin.length);
-
-      data = selectTeam(data, r, 0, true);
-      data = selectTeam(data, r, 1, true);
+      data = selectTeam(data, r, 0, true, meets, regionals);
+      data = selectTeam(data, r, 1, true, meets, regionals);
     }
 
     // # Select at-large teams
-    let results = doSelection(data);
+    let results = doSelection(data, meets, regionals);
     if (results == null || results.length == 0) {
       console.log('There was an error!!');
     } else {
       let alpha_order_teams = results.teamsin.sort();
-      if (VERBOSE) {
+      if (TEST) {
         console.log('\nTeams selected in alpha order:\n');
         for (let i = 0; i < alpha_order_teams.length; i++) {
           console.log(i + 1 + ' ' + alpha_order_teams[i]);
@@ -1358,20 +1376,20 @@ const execute = async () => {
         console.log(results.messages.join(''));
       }
     }
-    resolve(results.teamsin);
+    resolve(mapTeams(results));
   });
 };
 
 const runLocally = async () => {
   try {
-    const res = await execute();
+    const res = await execute(testRegionals, testMeets);
     console.log(res);
   } catch (err) {
     console.log(err);
   }
 };
 
-if (VERBOSE) {
+if (TEST) {
   runLocally();
 }
 

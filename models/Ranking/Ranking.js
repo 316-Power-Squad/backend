@@ -25,10 +25,12 @@ export const getRegionals = gender => {
       const rows = await db.queryAsync(
         `SELECT Region.name as region_name, 
           Team.name as team_name
-         FROM Region, Team 
+         FROM Region, Team, RegionalRank
          WHERE Region.id = Team.region_id
+         AND Team.id = RegionalRank.team_id
          AND Team.gender=?
          AND Region.name <> 'N/A' 
+         ORDER BY Region.name, RegionalRank.rank
         `,
         [gender]
       );
@@ -48,7 +50,7 @@ const formatMeets = rows => {
   let res = {};
   for (let row of rows) {
     if (!res[row.meet_name]) {
-      res[row.meet_name] = ['2017-09-29', [row.team_name]];
+      res[row.meet_name] = [row.meet_date, [row.team_name]];
     } else {
       let curr_teams = res[row.meet_name][1];
       curr_teams.push(row.team_name);
@@ -64,6 +66,7 @@ export const getMeets = async gender => {
       const rows = await db.queryAsync(
         `SELECT Team.name as team_name,
             Meet.id as meet_id, 
+            Meet.date as meet_date,
             Meet.name as meet_name, 
             Participates.placement 
           FROM Meet, Participates, Team 

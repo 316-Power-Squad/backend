@@ -1,17 +1,47 @@
 import express from 'express';
-const router = express.Router();
+import apicache from 'apicache';
 import Ranking from '../../models/Ranking';
 import { formatResponse } from '../../helpers/api';
 import algorithm from '../../kolas_algorithm';
 
-router.get('/', async (req, res) => {
+const router = express.Router();
+let cache = apicache.middleware;
+
+const qualifyTeams = gender => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const regionals = await Ranking.getRegionals(gender);
+      const meets = await Ranking.getMeets(gender);
+      const result = await algorithm(regionals, meets);
+      resolve(result);
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+router.get('/clear', (req, res) => {
+  apicache.clear();
+  res.json(formatResponse({ clear: true }));
+});
+
+// Need to have separate routes as we need to cache the two
+// calls separately
+router.get('/mens', cache('1 week'), async (req, res) => {
   try {
-    const teams = await Ranking.getRegionals('mens');
-    // const meets = await Ranking.getMeets('mens');
-    // const result = await algorithm();
-    res.send(formatResponse(teams));
+    const result = await qualifyTeams('mens');
+    res.json(formatResponse(result));
   } catch (err) {
-    res.send(formatResponse({}, err));
+    res.json(formatResponse({}, err));
+  }
+});
+
+router.get('/womens', cache('1 week'), async (req, res) => {
+  try {
+    const result = await qualifyTeams('womens');
+    res.json(formatResponse(result));
+  } catch (err) {
+    res.json(formatResponse({}, err));
   }
 });
 
