@@ -44,6 +44,14 @@ export const Schemas = [
   )
 `,
   `
+  CREATE TABLE RegionalRank (
+    team_id int NOT NULL REFERENCES Team(id),
+    region_id int NOT NULL REFERENCES Region(id),
+    rank int NOT NULL,
+    PRIMARY KEY (team_id)
+  )
+`,
+  `
   CREATE TABLE Meet (
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255) NOT NULL,

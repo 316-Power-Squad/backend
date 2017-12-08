@@ -9,11 +9,11 @@ https://gist.github.com/nrollr/3f57fc15ded7dddddcc4e82fe137b58e). Login with
 save the password in your environment as MYSQL_PASSWORD (as in put the following
 line in your ~/.bashrc: `export MYSQL_PASSWORD='blah'`. If you are running in
 prod mode you will need to also specify `MYSQL_USERNAME` in your environment.
-You can then run `npm run seed` (or `yarn seed`) to create the testing and prod
-databases. This essentially runs `helpers/schema.js`, which executes some
-`CREATE DATABASE` and `CREATE TABLE` queries. By default we seed the test
-database. To seed the production database change the parameter passed into seed
-in `seed.js`.
+You can then run `npm run seed` (or `yarn seed`) to create the testing
+databases. To create the prod database run `yarn seed prod`. This essentially
+runs `helpers/schema.js`, which executes some `CREATE DATABASE` and `CREATE
+TABLE` queries. By default we seed the test database. To seed the production
+database change the parameter passed into seed in `seed.js`.
 
 ## Authentication
 
@@ -32,9 +32,14 @@ accessible on `localhost:3001`;
 
 This node.js file makes use of the cheerio.js library. In order to run this
 scraping file, navigate to the backend/helpers/ directory then run the following
-command: `npm run scrape`. Currently, the scraping scrapes against one result
-file for testing purposes, but a slight change will allow us to scrape all
-result files found through our scraping. Essentially, we scrape each Division 1
-team from Wikipedia, then using that information, we scrape each team's page on
+command: `npm run scrape` or `yarn scrape`. To scrape data and populate the prod
+database run `yarn scrape prod`. Essentially, we scrape each Division 1 team
+from Wikipedia, then using that information, we scrape each team's page on
 tfrrs.org. We then store all those results in a set, and then from there we can
 iterate over and scrape every result page for the men's and women's results.
+
+## Running the Kolas Algorithm
+
+The file `kolas_algorithm.js` contains the algorithm that actually decides which
+teams should make it to nationals based on the current rankings. You can run
+this locally with `yarn rank verbose`.

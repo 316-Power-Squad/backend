@@ -16,8 +16,13 @@ app.use(cors());
 // Request logging
 app.use(morgan('dev'));
 
+const mode =
+  process.argv[process.argv.length - 1] === 'prod'
+    ? MODE_PRODUCTION
+    : MODE_TEST;
+
 // Connect to MySQL on start
-db.connect(MODE_TEST, function(err) {
+db.connect(mode, function(err) {
   if (err) {
     console.log('Unable to connect to MySQL.');
     process.exit(1);
