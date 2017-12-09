@@ -19,6 +19,9 @@ const connect = (mode, done) => {
     password: process.env.MYSQL_PASSWORD,
     // password: 'Powersquad',
     database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB,
+    ssl: {
+      ca: fs.readFileSync('../../config/amazon-rds-ca-cert.pem'),
+    },
   });
 
   state.mode = mode;
