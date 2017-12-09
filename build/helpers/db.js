@@ -25,6 +25,10 @@ var _async = require('async');
 
 var _async2 = _interopRequireDefault(_async);
 
+var _fs = require('fs');
+
+var _fs2 = _interopRequireDefault(_fs);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var PRODUCTION_DB = exports.PRODUCTION_DB = 'atlargeprod';
@@ -43,8 +47,10 @@ var connect = function connect(mode, done) {
     host: mode === MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
     user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
-    // password: 'Powersquad',
-    database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB
+    database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB,
+    ssl: {
+      ca: _fs2.default.readFileSync(__dirname + '/../../config/amazon-rds-ca-cert.pem')
+    }
   });
 
   state.mode = mode;
