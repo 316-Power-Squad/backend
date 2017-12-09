@@ -30,9 +30,9 @@ var _db2 = _interopRequireDefault(_db);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var specialCases = new _map2.default([['Miami (Ohio)', 'Miami OH'], ['Boston University', 'Boston U'], ['Dartmouth', 'Dartmouth College'], ['Manhattan', 'Manhattan College'], ['Ole Miss', 'Mississippi'], ['UT Martin', 'Tennessee Martin'], ['ETSU', 'East Tenn St'], ['Louisiana-Lafayette', 'UL Lafayette'], ['NC State', 'North Carolina St'], ['Middle Tennessee', 'Mid Tenn St'], ['Saint Joseph’s', 'St Josephs PA'], ['Ohio State', 'Ohio State University'], ['Maryland', 'Maryland College Park'], ['Loyola-Chicago', 'Loyola University Chicago'], ['Nevada', 'Nevada Las Vegas'], ['Mississippi State', 'Mississippi Valley State'], ['Southern Miss', 'Southern Mississippi'], ['UAB', 'Alabama Birmingham'], ['SMU', 'Southern Methodist'], ['TCU', 'Texas Christian'], ['Texas A&M-Corpus Christi', 'Texas A&M University–Corpus Christi'], ['Stephen F. Austin', 'Stephen F. Austin State'], ['Davidson', 'Davidson College']]);
+var dbMode = process.env.NODE_ENV === 'production' ? _db.MODE_PRODUCTION : _db.MODE_TEST;
 
-var dbMode = process.argv[process.argv.length - 1] === 'prod' ? _db.MODE_PRODUCTION : _db.MODE_TEST;
+var specialCases = new _map2.default([['Miami (Ohio)', 'Miami OH'], ['Boston University', 'Boston U'], ['Dartmouth', 'Dartmouth College'], ['Manhattan', 'Manhattan College'], ['Ole Miss', 'Mississippi'], ['UT Martin', 'Tennessee Martin'], ['ETSU', 'East Tenn St'], ['Louisiana-Lafayette', 'UL Lafayette'], ['NC State', 'North Carolina St'], ['Middle Tennessee', 'Mid Tenn St'], ['Saint Joseph’s', 'St Josephs PA'], ['Ohio State', 'Ohio State University'], ['Maryland', 'Maryland College Park'], ['Loyola-Chicago', 'Loyola University Chicago'], ['Nevada', 'Nevada Las Vegas'], ['Mississippi State', 'Mississippi Valley State'], ['Southern Miss', 'Southern Mississippi'], ['UAB', 'Alabama Birmingham'], ['SMU', 'Southern Methodist'], ['TCU', 'Texas Christian'], ['Texas A&M-Corpus Christi', 'Texas A&M University–Corpus Christi'], ['Stephen F. Austin', 'Stephen F. Austin State'], ['Davidson', 'Davidson College']]);
 
 var fetchRankings = function fetchRankings(url, gender) {
   return new _promise2.default(function () {

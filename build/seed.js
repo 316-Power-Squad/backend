@@ -8,7 +8,7 @@ var _db2 = _interopRequireDefault(_db);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var mode = process.argv[process.argv.length - 1] === 'prod' ? _db.MODE_PRODUCTION : _db.MODE_TEST;
+var mode = process.env.NODE_ENV === 'production' ? _db.MODE_PRODUCTION : _db.MODE_TEST;
 
 (0, _schema.seed)(mode, function (err) {
   if (err) console.log(err);

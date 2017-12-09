@@ -26,7 +26,7 @@ all subsequent API calls.
 
 Finally, you can run `npm start` or `yarn start`, which will start a dev server
 that watches for file changes and restarts on change. The API should be
-accessible on `localhost:3001`;
+accessible on `localhost:5000`;
 
 ## Running scraper.js file
 
@@ -43,3 +43,9 @@ iterate over and scrape every result page for the men's and women's results.
 The file `kolasAlgorithm.js` contains the algorithm that actually decides which
 teams should make it to nationals based on the current rankings. You can run
 this locally with `yarn rank verbose`.
+
+## Running the server
+
+You can run a dev server with `yarn dev`. To run the production server, build
+the app with `yarn build`. You can then run `yarn start`. Note that based on the
+value of `NODE_ENV` the app will use either the local or production database.

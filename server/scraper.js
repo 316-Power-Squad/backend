@@ -3,9 +3,7 @@ import cheerio from 'cheerio';
 import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
 
 const mode =
-  process.argv[process.argv.length - 1] === 'prod'
-    ? MODE_PRODUCTION
-    : MODE_TEST;
+  process.env.NODE_ENV === 'production' ? MODE_PRODUCTION : MODE_TEST;
 
 let urls = [];
 // ex. https://www.tfrrs.org/teams/xc/NC_college_m_Duke.html
