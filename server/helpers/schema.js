@@ -97,13 +97,13 @@ const executeQueries = async (conn, queryArray) => {
 export const seed = mode => {
   // Create a separate connection for creating the database
   const initialConnection = mysql.createConnection({
-    host: mode === MODE_PRODUCTION ? process.env.PRODUCTION_HOST : 'localhost',
+    host: mode === MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
     user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
   });
 
   const seedConnection = mysql.createConnection({
-    host: mode === MODE_PRODUCTION ? process.env.PRODUCTION_HOST : 'localhost',
+    host: mode === MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
     user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
     database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB,

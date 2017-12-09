@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../server/models/Region/index.js"],"names":[],"mappings":";;;;;;AAAA","file":"index.js","sourcesContent":["import Region from './Region';\nexport default Region;\n"]}

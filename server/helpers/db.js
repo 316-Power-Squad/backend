@@ -14,7 +14,7 @@ let state = {
 
 const connect = (mode, done) => {
   state.pool = mysql.createPool({
-    host: mode === MODE_PRODUCTION ? process.env.PRODUCTION_HOST : 'localhost',
+    host: mode === MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
     user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
     // password: 'Powersquad',
