@@ -14,11 +14,11 @@ var _errors = require('./errors');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var getTeam = exports.getTeam = function getTeam(id, done) {
-  _db2.default.get().query('SELECT * FROM Team WHERE id=?', [id], function (err, rows) {
+  _db2.default.get().query('\n    SELECT Participates.meet_id, Participates.placement, Meet.name as meet, Meet.date\n    FROM Participates, Meet \n    WHERE Participates.team_id=?\n      AND Meet.id = Participates.meet_id \n    ORDER BY Meet.id DESC \n    LIMIT 10\n  ', [id], function (err, rows) {
     if (err) return done({}, _db.sqlError);else if (rows.length === 0) {
       return done({}, _errors.noTeamError);
     }
-    done(rows[0]);
+    done(rows);
   });
 }; /**
     * Example model for querying the teams
