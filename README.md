@@ -40,6 +40,6 @@ iterate over and scrape every result page for the men's and women's results.
 
 ## Running the Kolas Algorithm
 
-The file `kolas_algorithm.js` contains the algorithm that actually decides which
+The file `kolasAlgorithm.js` contains the algorithm that actually decides which
 teams should make it to nationals based on the current rankings. You can run
 this locally with `yarn rank verbose`.

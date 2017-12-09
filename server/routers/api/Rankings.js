@@ -2,7 +2,7 @@ import express from 'express';
 import apicache from 'apicache';
 import Ranking from '../../models/Ranking';
 import { formatResponse } from '../../helpers/api';
-import algorithm from '../../kolas_algorithm';
+import algorithm from '../../kolasAlgorithm';
 
 const router = express.Router();
 let cache = apicache.middleware;
