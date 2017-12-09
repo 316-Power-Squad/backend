@@ -40,8 +40,8 @@ var state = {
 
 var connect = function connect(mode, done) {
   state.pool = _mysql2.default.createPool({
-    host: 'localhost',
-    user: 'root',
+    host: mode === MODE_PRODUCTION ? process.env.PRODUCTION_HOST : 'localhost',
+    user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
     // password: 'Powersquad',
     database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB

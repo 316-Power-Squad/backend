@@ -2,6 +2,9 @@ import request from 'request-promise';
 import cheerio from 'cheerio';
 import db, { MODE_TEST, MODE_PRODUCTION } from './helpers/db';
 
+const dbMode =
+  process.env.NODE_ENV === 'production' ? MODE_PRODUCTION : MODE_TEST;
+
 const specialCases = new Map([
   ['Miami (Ohio)', 'Miami OH'],
   ['Boston University', 'Boston U'],
@@ -27,11 +30,6 @@ const specialCases = new Map([
   ['Stephen F. Austin', 'Stephen F. Austin State'],
   ['Davidson', 'Davidson College'],
 ]);
-
-const dbMode =
-  process.argv[process.argv.length - 1] === 'prod'
-    ? MODE_PRODUCTION
-    : MODE_TEST;
 
 const fetchRankings = (url, gender) => {
   return new Promise(async (resolve, reject) => {
