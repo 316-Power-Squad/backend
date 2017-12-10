@@ -2,8 +2,8 @@ import mysql from 'mysql';
 import async from 'async';
 import fs from 'fs';
 
-export const PRODUCTION_DB = 'atlargeprod';
 export const TEST_DB = 'atlargetest';
+export const PRODUCTION_DB = process.env.PRODUCTION_DB;
 
 export const MODE_TEST = 'MODE_TEST';
 export const MODE_PRODUCTION = 'MODE_PRODUCTION';
@@ -15,7 +15,7 @@ let state = {
 
 const connect = (mode, done) => {
   state.pool = mysql.createPool({
-    host: mode === MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
+    host: mode === MODE_PRODUCTION ? process.env.DATABASE_HOST : 'localhost',
     user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
     database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB,
