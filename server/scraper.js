@@ -512,8 +512,12 @@ const getResults = async () => {
     meetDates = new Map([...meetDates, ...newMeets.dates]);
     region = region ? region : newMeets.region;
     try {
-      await insertTeam(teams[i][0], 'mens', region);
-      await insertTeam(teams[i][0], 'womens', region);
+      if (region) {
+        await insertSchool(teams[i][0], region);
+        await insertTeam(teams[i][0], 'mens');
+        await insertTeam(teams[i][0], 'womens');
+      }
+      //await insertTeam(teams[i][0], 'womens', region);
     } catch (err) {
       console.log(err);
       console.log(`Error inserting team ${teams[i][0]}`);
@@ -608,20 +612,20 @@ const insertMeet = async (name, date) => {
   });
 };
 
-const insertTeam = async (name, gender, region) => {
+const insertSchool = async (name, region) => {
   const lastIndex = region.lastIndexOf(' ');
   let actualRegion = region.substring(0, lastIndex);
   if (!actualRegion) {
     actualRegion = 'N/A';
   }
   const team = name.replace(/_/g, ' ');
-  console.log(`Inserting a team ${team} with region ${region}`);
+  console.log(`Inserting a school ${team} with region ${region}`);
   return new Promise((resolve, reject) => {
     db.get().query(
-      `INSERT INTO Team (name, gender, region_id) values (?, ?, (
+      `INSERT INTO School (name, region_id) values (?, (
           SELECT id from Region WHERE Region.name=?
         ))`,
-      [team, gender, actualRegion],
+      [team, actualRegion],
       err => {
         if (err) reject(err);
         else resolve();
@@ -630,6 +634,21 @@ const insertTeam = async (name, gender, region) => {
   });
 };
 
+const insertTeam = async (school, gender) => {
+  console.log(`Inserting ${gender} team for school ${school}`);
+  let actualSchool = school.split('_').join(' ');
+  return new Promise((resolve, reject) => {
+    db.get().query(
+      `INSERT INTO Team (school_id, gender) values ((SELECT ID FROM School WHERE School.name=?), ?)`,
+      [actualSchool, gender],
+      err => {
+        if (err) reject(err);
+        else resolve();
+      }
+    );
+  })
+}
+
 const insertParticipates = async (meet, team, gender, place) => {
   console.log(
     `Inserting a participates record ${meet}, ${team}, ${gender}, ${place}`
@@ -637,7 +656,7 @@ const insertParticipates = async (meet, team, gender, place) => {
   const teamName = team.replace(/_/g, ' ');
   return new Promise((resolve, reject) => {
     let query = `INSERT INTO Participates (team_id, meet_id, placement) values (
-      (SELECT ID FROM Team WHERE name=? and gender=?),
+      (SELECT School.ID FROM School, Team WHERE School.name=? and Team.gender=?),
       (SELECT ID FROM Meet WHERE name=?),
       ?
     )`;

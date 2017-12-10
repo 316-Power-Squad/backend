@@ -26,15 +26,23 @@ export const Schemas = [
   )
 `,
   `
-  CREATE TABLE Team (
+  CREATE TABLE School (
     ID int NOT NULL AUTO_INCREMENT,
     name varchar(255) NOT NULL,
-    region_id int NOT NULL REFERENCES Region(id),
-    gender ENUM('mens', 'womens') NOT NULL,
+    region_id int NOT NULL REFERENCES Region(id), 
     PRIMARY KEY (ID),
-    UNIQUE(name, gender)
+    UNIQUE (name)
+)
+`
+,
+`
+  CREATE TABLE Team (
+    school_id int NOT NULL REFERENCES School(ID),
+    gender ENUM('mens', 'womens') NOT NULL,
+    PRIMARY KEY(school_id, gender)
   )
-`,
+`
+,
   `
   CREATE TABLE Region (
     ID int NOT NULL AUTO_INCREMENT,
