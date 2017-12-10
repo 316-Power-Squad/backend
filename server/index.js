@@ -17,9 +17,7 @@ app.use(cors());
 app.use(morgan('dev'));
 
 const mode =
-  process.argv[process.argv.length - 1] === 'prod'
-    ? MODE_PRODUCTION
-    : MODE_TEST;
+  process.env.NODE_ENV === 'production' ? MODE_PRODUCTION : MODE_TEST;
 
 // Connect to MySQL on start
 db.connect(mode, function(err) {
