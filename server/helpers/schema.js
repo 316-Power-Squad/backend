@@ -17,6 +17,7 @@ export const createDatabaseQueries = [
 ];
 
 export const Schemas = [
+  `DROP TABLE IF EXISTS User, Team, Region, RegionalRank, Meet, Participates`,
   `
   CREATE TABLE User (
     email varchar(255) NOT NULL,
@@ -95,27 +96,34 @@ const executeQueries = async (conn, queryArray) => {
 
 // This is what callback hell looks like - should use async / await
 export const seed = mode => {
-  // Create a separate connection for creating the database
-  const initialConnection = mysql.createConnection({
-    host: mode === MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
-    user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
-    password: process.env.MYSQL_PASSWORD,
-  });
+  const prod = mode === MODE_PRODUCTION;
+  // Create a separate connection for creating the database. Don't do this on
+  // prod as we only get one database
+  const initialConnection = prod
+    ? null
+    : mysql.createConnection({
+        host: 'localhost',
+        user: 'root',
+        password: process.env.MYSQL_PASSWORD,
+      });
 
   const seedConnection = mysql.createConnection({
-    host: mode === MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
-    user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
+    host: prod ? process.env.DATABASE_HOST : 'localhost',
+    user: prod ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
-    database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB,
+    database: prod ? PRODUCTION_DB : TEST_DB,
   });
 
   return new Promise(async (resolve, reject) => {
     try {
-      await executeQueries(initialConnection, createDatabaseQueries);
-      initialConnection.end();
+      if (!prod) {
+        await executeQueries(initialConnection, createDatabaseQueries);
+        initialConnection.end();
+      }
       await executeQueries(seedConnection, Schemas);
       await executeQueries(seedConnection, Views);
       seedConnection.end();
+      process.exit(0);
     } catch (err) {
       console.log(err);
     }

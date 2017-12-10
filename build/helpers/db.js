@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.MODE_PRODUCTION = exports.MODE_TEST = exports.TEST_DB = exports.PRODUCTION_DB = undefined;
+exports.MODE_PRODUCTION = exports.MODE_TEST = exports.PRODUCTION_DB = exports.TEST_DB = undefined;
 
 var _regenerator = require('babel-runtime/regenerator');
 
@@ -31,8 +31,8 @@ var _fs2 = _interopRequireDefault(_fs);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var PRODUCTION_DB = exports.PRODUCTION_DB = 'atlargeprod';
 var TEST_DB = exports.TEST_DB = 'atlargetest';
+var PRODUCTION_DB = exports.PRODUCTION_DB = process.env.PRODUCTION_DB;
 
 var MODE_TEST = exports.MODE_TEST = 'MODE_TEST';
 var MODE_PRODUCTION = exports.MODE_PRODUCTION = 'MODE_PRODUCTION';
@@ -44,7 +44,7 @@ var state = {
 
 var connect = function connect(mode, done) {
   state.pool = _mysql2.default.createPool({
-    host: mode === MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
+    host: mode === MODE_PRODUCTION ? process.env.DATABASE_HOST : 'localhost',
     user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
     database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB
