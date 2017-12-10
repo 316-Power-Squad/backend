@@ -40,7 +40,7 @@ app.use((0, _cors2.default)());
 // Request logging
 app.use((0, _morgan2.default)('dev'));
 
-var mode = process.argv[process.argv.length - 1] === 'prod' ? _db.MODE_PRODUCTION : _db.MODE_TEST;
+var mode = process.env.NODE_ENV === 'production' ? _db.MODE_PRODUCTION : _db.MODE_TEST;
 
 // Connect to MySQL on start
 _db2.default.connect(mode, function (err) {
