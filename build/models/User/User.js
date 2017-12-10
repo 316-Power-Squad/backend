@@ -49,7 +49,7 @@ var newUser = exports.newUser = function newUser(name, email, password, done) {
 
 var validateUser = exports.validateUser = function validateUser(email, password, done) {
   _db2.default.get().query('SELECT * FROM User WHERE email=?', [email], function (err, rows) {
-    if (err) done(false, sqlError);else if (rows.length === 0) {
+    if (err) done(false, err);else if (rows.length === 0) {
       done({}, _errors.noUserError);
     } else {
       _bcrypt2.default.compare(password, rows[0].hash, function (err, res) {

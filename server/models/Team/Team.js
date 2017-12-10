@@ -6,13 +6,24 @@ import { sqlError } from '../../helpers/db';
 import { noTeamError, nameError } from './errors';
 
 export const getTeam = (id, done) => {
-  db.get().query(`SELECT * FROM Team WHERE id=?`, [id], (err, rows) => {
-    if (err) return done({}, sqlError);
-    else if (rows.length === 0) {
-      return done({}, noTeamError);
+  db.get().query(
+    `
+    SELECT Participates.meet_id, Participates.placement, Meet.name as meet, Meet.date
+    FROM Participates, Meet 
+    WHERE Participates.team_id=?
+      AND Meet.id = Participates.meet_id 
+    ORDER BY Meet.id DESC 
+    LIMIT 10
+  `,
+    [id],
+    (err, rows) => {
+      if (err) return done({}, sqlError);
+      else if (rows.length === 0) {
+        return done({}, noTeamError);
+      }
+      done(rows);
     }
-    done(rows[0]);
-  });
+  );
 };
 
 export const allTeams = done => {

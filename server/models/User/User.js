@@ -45,7 +45,7 @@ export const newUser = (name, email, password, done) => {
 
 export const validateUser = (email, password, done) => {
   db.get().query(`SELECT * FROM User WHERE email=?`, [email], (err, rows) => {
-    if (err) done(false, sqlError);
+    if (err) done(false, err);
     else if (rows.length === 0) {
       done({}, noUserError);
     } else {

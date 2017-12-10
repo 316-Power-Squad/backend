@@ -14,11 +14,11 @@ var _errors = require('./errors');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var getMeet = exports.getMeet = function getMeet(id, done) {
-  _db2.default.get().query('SELECT * FROM Meet WHERE id=?', [id], function (err, rows) {
+  _db2.default.get().query('SELECT Team.name as team, Team.gender, Participates.placement, Region.name as region\n    FROM Participates, Team, Region \n    WHERE Participates.meet_id=? and Team.id=Participates.team_id and Region.id=Team.region_id; \n  ', [id], function (err, rows) {
     if (err) return done({}, err);else if (rows.length === 0) {
       return done({}, _errors.noMeetError);
     }
-    done(rows[0]);
+    done(rows);
   });
 };
 

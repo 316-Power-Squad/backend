@@ -1,5 +1,6 @@
 import mysql from 'mysql';
 import async from 'async';
+import fs from 'fs';
 
 export const PRODUCTION_DB = 'atlargeprod';
 export const TEST_DB = 'atlargetest';
@@ -17,11 +18,7 @@ const connect = (mode, done) => {
     host: mode === MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
     user: mode === MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
-    // password: 'Powersquad',
     database: mode === MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB,
-    ssl: {
-      ca: fs.readFileSync('../../config/amazon-rds-ca-cert.pem'),
-    },
   });
 
   state.mode = mode;
