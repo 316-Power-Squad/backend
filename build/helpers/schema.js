@@ -42,7 +42,7 @@ var createDatabaseQueries = exports.createDatabaseQueries = ['DROP DATABASE IF E
                                                                                                                                                                                                            * In this file we define the schema for the database. We also provide a function for
                                                                                                                                                                                                            * intitializing the schema. Need to worry about updating the schema as well (migrations)
                                                                                                                                                                                                            */
-var Schemas = exports.Schemas = ['\n  CREATE TABLE User (\n    email varchar(255) NOT NULL,\n    name varchar(255) NOT NULL,\n    hash varchar(255) NOT NULL,\n    PRIMARY KEY (email)\n  )\n', '\n  CREATE TABLE Team (\n    ID int NOT NULL AUTO_INCREMENT,\n    name varchar(255) NOT NULL,\n    region_id int NOT NULL REFERENCES Region(id),\n    gender ENUM(\'mens\', \'womens\') NOT NULL,\n    PRIMARY KEY (ID),\n    UNIQUE(name, gender)\n  )\n', '\n  CREATE TABLE Region (\n    ID int NOT NULL AUTO_INCREMENT,\n    name varchar(255) NOT NULL,\n    PRIMARY KEY (ID),\n    UNIQUE(name)\n  )\n', '\n  CREATE TABLE RegionalRank (\n    team_id int NOT NULL REFERENCES Team(id),\n    region_id int NOT NULL REFERENCES Region(id),\n    rank int NOT NULL,\n    PRIMARY KEY (team_id)\n  )\n', '\n  CREATE TABLE Meet (\n    ID int NOT NULL AUTO_INCREMENT,\n    name varchar(255) NOT NULL,\n    date varchar(255) NOT NULL,\n    PRIMARY KEY (ID)\n  )\n', '\n  CREATE TABLE Participates (\n    team_id int NOT NULL REFERENCES Team(id),\n    meet_id int NOT NULL REFERENCES Meet(id),\n    placement int NOT NULL,\n    PRIMARY KEY (team_id, meet_id)\n  )\n'];
+var Schemas = exports.Schemas = ['DROP TABLE IF EXISTS User, Team, Region, RegionalRank, Meet, Participates', '\n  CREATE TABLE User (\n    email varchar(255) NOT NULL,\n    name varchar(255) NOT NULL,\n    hash varchar(255) NOT NULL,\n    PRIMARY KEY (email)\n  )\n', '\n  CREATE TABLE Team (\n    ID int NOT NULL AUTO_INCREMENT,\n    name varchar(255) NOT NULL,\n    region_id int NOT NULL REFERENCES Region(id),\n    gender ENUM(\'mens\', \'womens\') NOT NULL,\n    PRIMARY KEY (ID),\n    UNIQUE(name, gender)\n  )\n', '\n  CREATE TABLE Region (\n    ID int NOT NULL AUTO_INCREMENT,\n    name varchar(255) NOT NULL,\n    PRIMARY KEY (ID),\n    UNIQUE(name)\n  )\n', '\n  CREATE TABLE RegionalRank (\n    team_id int NOT NULL REFERENCES Team(id),\n    region_id int NOT NULL REFERENCES Region(id),\n    rank int NOT NULL,\n    PRIMARY KEY (team_id)\n  )\n', '\n  CREATE TABLE Meet (\n    ID int NOT NULL AUTO_INCREMENT,\n    name varchar(255) NOT NULL,\n    date varchar(255) NOT NULL,\n    PRIMARY KEY (ID)\n  )\n', '\n  CREATE TABLE Participates (\n    team_id int NOT NULL REFERENCES Team(id),\n    meet_id int NOT NULL REFERENCES Meet(id),\n    placement int NOT NULL,\n    PRIMARY KEY (team_id, meet_id)\n  )\n'];
 
 var Views = exports.Views = [];
 
@@ -165,18 +165,20 @@ var executeQueries = function () {
 
 // This is what callback hell looks like - should use async / await
 var seed = exports.seed = function seed(mode) {
-  // Create a separate connection for creating the database
-  var initialConnection = _mysql2.default.createConnection({
-    host: mode === _db.MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
-    user: mode === _db.MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
+  var prod = mode === _db.MODE_PRODUCTION;
+  // Create a separate connection for creating the database. Don't do this on
+  // prod as we only get one database
+  var initialConnection = prod ? null : _mysql2.default.createConnection({
+    host: 'localhost',
+    user: 'root',
     password: process.env.MYSQL_PASSWORD
   });
 
   var seedConnection = _mysql2.default.createConnection({
-    host: mode === _db.MODE_PRODUCTION ? process.env.DATABASE_URL : 'localhost',
-    user: mode === _db.MODE_PRODUCTION ? process.env.MYSQL_USERNAME : 'root',
+    host: prod ? process.env.DATABASE_HOST : 'localhost',
+    user: prod ? process.env.MYSQL_USERNAME : 'root',
     password: process.env.MYSQL_PASSWORD,
-    database: mode === _db.MODE_PRODUCTION ? _db.PRODUCTION_DB : _db.TEST_DB
+    database: prod ? _db.PRODUCTION_DB : _db.TEST_DB
   });
 
   return new _promise2.default(function () {
@@ -186,35 +188,44 @@ var seed = exports.seed = function seed(mode) {
           switch (_context3.prev = _context3.next) {
             case 0:
               _context3.prev = 0;
-              _context3.next = 3;
+
+              if (prod) {
+                _context3.next = 5;
+                break;
+              }
+
+              _context3.next = 4;
               return executeQueries(initialConnection, createDatabaseQueries);
 
-            case 3:
+            case 4:
               initialConnection.end();
-              _context3.next = 6;
+
+            case 5:
+              _context3.next = 7;
               return executeQueries(seedConnection, Schemas);
 
-            case 6:
-              _context3.next = 8;
+            case 7:
+              _context3.next = 9;
               return executeQueries(seedConnection, Views);
 
-            case 8:
+            case 9:
               seedConnection.end();
-              _context3.next = 14;
+              process.exit(0);
+              _context3.next = 16;
               break;
 
-            case 11:
-              _context3.prev = 11;
+            case 13:
+              _context3.prev = 13;
               _context3.t0 = _context3['catch'](0);
 
               console.log(_context3.t0);
 
-            case 14:
+            case 16:
             case 'end':
               return _context3.stop();
           }
         }
-      }, _callee3, undefined, [[0, 11]]);
+      }, _callee3, undefined, [[0, 13]]);
     }));
 
     return function (_x5, _x6) {
