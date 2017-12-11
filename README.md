@@ -54,3 +54,8 @@ production server, build the app with `yarn build`. You can then run `yarn
 start` which runs the compiled index file in the build/ directory. Note that
 based on the value of `NODE_ENV` the app will use either the local or production
 database.
+
+## Hosting
+
+The app and the database are hosted on Heroku for the moment. To deploy you will
+need Zac's credentials.
