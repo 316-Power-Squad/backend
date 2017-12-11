@@ -20,10 +20,15 @@ router.post('/new', (req, res) => {
   });
 });
 
-router.get('/:id', (req, res) => {
-  Team.getTeam(req.params.id, (result, err) => {
-    res.send(formatResponse(result, err));
-  });
+router.get('/:id', async (req, res) => {
+  try {
+    const team = await Team.getTeam(req.params.id);
+    const meets = await Team.getMeets(req.params.id);
+    res.send(formatResponse({ team, meets }));
+  } catch (err) {
+    res.send(formatResponse({}, err));
+    console.log(err);
+  }
 });
 
 export default router;
