@@ -23,7 +23,7 @@ var getRegion = exports.getRegion = function getRegion(id, done) {
 };
 
 var allRegions = exports.allRegions = function allRegions(done) {
-  _db2.default.get().query('SELECT * FROM Region', function (err, rows) {
+  _db2.default.get().query('SELECT Region.id, Region.name, COUNT(*) AS num_teams \n      FROM Region, Team\n      WHERE Region.name<>"N/A"\n        AND Team.region_id=Region.id \n      GROUP BY Team.region_id \n      ORDER BY num_teams DESC', function (err, rows) {
     if (err) return done([], err);
     done(rows);
   });

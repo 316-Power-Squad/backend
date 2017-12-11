@@ -5,25 +5,49 @@ import db from '../../helpers/db';
 import { sqlError } from '../../helpers/db';
 import { noTeamError, nameError } from './errors';
 
-export const getTeam = (id, done) => {
-  db.get().query(
-    `
-    SELECT Participates.meet_id, Participates.placement, Meet.name as meet, Meet.date
-    FROM Participates, Meet 
-    WHERE Participates.team_id=?
-      AND Meet.id = Participates.meet_id 
-    ORDER BY Meet.id DESC 
-    LIMIT 10
-  `,
-    [id],
-    (err, rows) => {
-      if (err) return done({}, sqlError);
-      else if (rows.length === 0) {
-        return done({}, noTeamError);
+export const getTeam = id => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const res = await db.queryAsync(`SELECT * from Team WHERE ID=?`, [id]);
+      if (res.length === 0) {
+        reject(noTeamError);
+      } else {
+        resolve(res[0]);
       }
-      done(rows);
+    } catch (err) {
+      reject(err);
     }
-  );
+  });
+};
+
+// Get team stats for a graph
+export const getTeamStats = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      const res = db.queryAsync(``, []);
+    } catch (err) {}
+  });
+};
+
+export const getMeets = id => {
+  return new Promise((resolve, reject) => {
+    try {
+      const res = db.queryAsync(
+        `
+        SELECT Participates.meet_id, Participates.placement, Meet.name as meet, Meet.date
+        FROM Participates, Meet 
+        WHERE Participates.team_id=?
+          AND Meet.id = Participates.meet_id 
+        ORDER BY Meet.id DESC 
+        LIMIT 10
+        `,
+        [id]
+      );
+      resolve(res);
+    } catch (err) {
+      reject(err);
+    }
+  });
 };
 
 export const allTeams = done => {
@@ -33,27 +57,8 @@ export const allTeams = done => {
   });
 };
 
-export const newTeam = (name, gender, region, done) => {
-  if (name.length < 2 || !['mens', 'womens'].includes(gender)) {
-    done([], nameError);
-  } else {
-    db
-      .get()
-      .query(
-        `INSERT INTO Team (name, gender, region) VALUES (?, ?, ?)`,
-        [name, gender, region],
-        (err, result) => {
-          if (err) return done([], sqlError);
-          done({
-            id: result.insertId,
-          });
-        }
-      );
-  }
-};
-
 export default {
   getTeam,
+  getMeets,
   allTeams,
-  newTeam,
 };

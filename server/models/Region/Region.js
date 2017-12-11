@@ -13,10 +13,18 @@ export const getRegion = (id, done) => {
 };
 
 export const allRegions = done => {
-  db.get().query(`SELECT * FROM Region`, (err, rows) => {
-    if (err) return done([], err);
-    done(rows);
-  });
+  db.get().query(
+    `SELECT Region.id, Region.name, COUNT(*) AS num_teams 
+      FROM Region, Team
+      WHERE Region.name<>"N/A"
+        AND Team.region_id=Region.id 
+      GROUP BY Team.region_id 
+      ORDER BY num_teams DESC`,
+    (err, rows) => {
+      if (err) return done([], err);
+      done(rows);
+    }
+  );
 };
 
 export default {
